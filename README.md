@@ -1,2 +1,2 @@
 # utilities
-Collection of useful things
+Collection of (hopefully) useful things
