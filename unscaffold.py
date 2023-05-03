@@ -22,27 +22,34 @@ def parse_arguments():
     Parse command line arguments & print help message if # of arguments is incorrect
     '''
 
-    global input_path, output_path, contig_prefix, gap_size, out_line_len
+    global input_path, output_path, contig_prefix, gap_size, out_line_len, size_sort
 
-    # fetch arguments    
-    _, input_path, output_path, contig_prefix, gap_size, out_line_len = sys.argv
 
     # print help message if incorrect number of arguments was specified
-    if len(sys.argv) != 6:
+    if len(sys.argv) != 7:
         print(
-            '   python unscaffold.py <input path> <output path> <contig prefix> <gap size>\
-                                <output line length>\n\n\
+            '\n   python unscaffold.py <input path> <output path> <contig prefix> <gap size>\
+ <output line length>\n\n\
             <input path>             str    path to uncompressed or gzipped input FASTA\n\
             <output path>            str    path to output FASTA (*.gz for gzipped output)\n\
             <contig prefix>          str    prefix to use for output contigs (e.g. "contig_")\n\
             <gap size>               int    gap size to split at (this should be the gap\n\
                                             size used by the scaffolding software)\n\
-            <output line length>     int    line length for output FASTA, e.g. 100',
+            <output line length>     int    line length for output FASTA, e.g. 100\n\
+            <size sort>              str    "True" to sort contigs by size, "False" to keep\n\
+                                            order unchanged\n',
         file=sys.stderr,
         )
+        sys.exit()
+    
+    # fetch arguments    
+    _, input_path, output_path, contig_prefix, gap_size, out_line_len, size_sort = sys.argv
 
     # change str to int where appropriate
     gap_size, out_line_len = int(gap_size), int(out_line_len)
+
+    # convert sort to bool
+    size_sort = True if size_sort == 'True' else False
 
 
 def collect_scaffolds(input_path):
@@ -92,14 +99,14 @@ def unscaffold(scaffold_lst, gap_size):
         for i in scaffold:
 
             if gap:
-                
-                if i == 'N':
-                    gap += 1
+
+                if i in ('N', 'n'):
+                    gap += i
 
                 else:
                                 
-                    if gap != gap_size:
-                        contig += ''.join(['N'] * gap) + i
+                    if len(gap) != gap_size:
+                        contig += gap + i
 
                     else:   
                         if len(contig) > 0: contig_lst.append(contig) 
@@ -107,15 +114,15 @@ def unscaffold(scaffold_lst, gap_size):
                     
                     gap = False
 
-            elif i == 'N':
-                gap = 1
+            elif i in ('N', 'n'):
+                gap = i
 
             else:
                 contig += i
         
         if gap:
-            if gap != gap_size:
-                contig += ''.join(['N'] * gap) + i
+            if len(gap) != gap_size:
+                contig += gap + i
 
         if len(contig_lst) > 0:
             contig_lst.append(contig)
@@ -123,18 +130,19 @@ def unscaffold(scaffold_lst, gap_size):
     return contig_lst
 
 
-def sort_and_save(contig_lst, output_path, contig_prefix, out_line_len):
+def sort_and_save(contig_lst, output_path, contig_prefix, out_line_len, size_sort):
     '''
     Sort contigs by size, and write them to file using specified line length
     '''
 
-    contig_lst.sort(key=len, reverse=True)
+    if size_sort:
+        contig_lst.sort(key=len, reverse=True)
 
     write_func = gzip.open if output_path.endswith('.gz') else open
     with write_func(output_path, 'wt') as fasta:
         
         for idx, contig in enumerate(contig_lst):
-            fasta.write('>' + str(contig_prefix) + str (idx) + '\n')
+            fasta.write('>' + str(contig_prefix) + str (idx+1) + '\n')
             for line in range(0, len(contig), out_line_len):
                     fasta.write(contig[line:line+out_line_len] + '\n')
                     
