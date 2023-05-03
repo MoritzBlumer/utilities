@@ -161,7 +161,7 @@ def main():
     contig_lst = unscaffold(scaffold_lst, gap_size)
 
     # sort by size and write output
-    sort_and_save(contig_lst, output_path, contig_prefix, out_line_len)
+    sort_and_save(contig_lst, output_path, contig_prefix, out_line_len, size_sort)
 
 if __name__ == '__main__':
     main()
