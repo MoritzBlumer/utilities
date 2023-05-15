@@ -19,3 +19,4 @@ Submit jobs e.g. in a loop on a server without job scheduler.
 - .screen/screen.name.submit contains submission time and command
 - .screen/screen.name.out contains all STDERR and STDOUT
 - example: screener "echo test" test
+- make executable (chmod +x screener) and add do $PATH to call it from anywhere
