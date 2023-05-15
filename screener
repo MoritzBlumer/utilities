@@ -1,0 +1,36 @@
+#!/bin/bash
+
+set -eo pipefail
+
+# Assign parameters and set defaults:
+prompt=$1
+name=${2-$(date +'%Y'-'%m'-'%d'_'%H'-'%M'-'%S'_screen)}
+name=$(echo ${name} | sed 's|/|_|g')
+
+# check if arguments were set, else exit
+if [ $# -eq 0 ]
+  then
+    echo -e "\n[ERROR] No arguments specified.\n"
+    echo -e "Usage:\n"
+    echo -e "  screener <prompt> <name> \n"
+    exit 1
+fi
+
+# make screen dir if does not exist:
+mkdir -p .screen
+
+# compile output (STDOUT + STDERR) .screen file path
+out_prefix=.screen/screen.${name}
+
+# set job file
+cat << EOF > ${out_prefix}.submit
+#!/bin/bash
+
+# time: `date`
+
+# command 
+$prompt &> ${out_prefix}.out
+EOF
+
+# launch screen & run submission script
+screen -d -S $name -m bash ./${out_prefix}.submit
