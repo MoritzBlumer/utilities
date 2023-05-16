@@ -6,7 +6,7 @@ Collection of (hopefully) useful things
 ## screener
 
 Submit jobs e.g. in a loop on a server without job scheduler.
-- usage: ```screener <"command"> <name>```
+- usage: ```screener <"command"> <job name>```
 - creates directory .screen with files .screen/screen.name.submit and .screen/screen.name.out
 - .screen/screen.name.submit contains submission time and command
 - .screen/screen.name.out contains all STDERR and STDOUT
@@ -32,5 +32,7 @@ Splits sequences in a FASTA at stretches of Ns of specified size and outputs a n
 - does not modify gaps of other than the specified size
 - optional size sort of output contigs
 - reads all sequences into memory (--> therefore requires ~ 2x the memory size of the uncompressed input FASTA)
+- usage: ```unscaffold.py <input path> <output path> <contig-prefix> <gap size> <out fasta line length> <size sort True/False>```
+- for details check ```unscaffold.py --help```
 
 
