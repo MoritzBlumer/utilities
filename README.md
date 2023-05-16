@@ -6,7 +6,7 @@ Collection of (hopefully) useful things
 ## screener
 
 Submit jobs e.g. in a loop on a server without job scheduler.
-- usage: screener <"command"> <name>
+- usage: ```screener <"command"> <name>```
 - creates directory .screen with files .screen/screen.name.submit and .screen/screen.name.out
 - .screen/screen.name.submit contains submission time and command
 - .screen/screen.name.out contains all STDERR and STDOUT
@@ -16,12 +16,13 @@ Submit jobs e.g. in a loop on a server without job scheduler.
   
 ## simplify_bam.py
 
-Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV load time (using pysam functions); write read length to 9th field
+Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV load time; write read length to 9th field
+- dependency: pysam (https://github.com/pysam-developers/pysam)
 - reads input SAM/BAM
 - simplifies input records by removing query alignment details and writing them to indexed output BAM
 - removes tags to reduce size 
 - can reduce BAM file size to <0.01 %
-- usage: simplify_bam.py <input sam/bam> <output bam>
+- usage: ```simplify_bam.py <input sam/bam> <output bam>```
 
                                     
 ## unscaffold.py
