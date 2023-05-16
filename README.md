@@ -16,7 +16,7 @@ Submit jobs e.g. in a loop on a server without job scheduler.
   
 ## simplify_bam.py
 
-  Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV load time (using pysam functions); write read length to 9th field
+Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV load time (using pysam functions); write read length to 9th field
 - reads input SAM/BAM
 - simplifies input records by removing query alignment details and writing them to indexed output BAM
 - removes tags to reduce size 
