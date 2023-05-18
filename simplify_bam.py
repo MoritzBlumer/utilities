@@ -18,7 +18,7 @@ import pysam
 import sys, os
 
 
-## Private functions
+## Functions
 
 def parse_arguments():
     '''
