@@ -34,3 +34,7 @@ EOF
 
 # launch screen & run submission script
 screen -d -S $name -m bash ./${out_prefix}.submit
+
+# print info message:
+echo -e "\nlaunched screen job: $name"
+echo -e "command: ${prompt}\n"
