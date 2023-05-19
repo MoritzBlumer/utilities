@@ -8,7 +8,7 @@
 
 
 ## File info
-__author__ = 'Moritz Blumer, 2022'
+__author__ = 'Moritz Blumer, 2023'
 __version__ = '1.0'
 __email__ = 'lmb215@cam.ac.uk'
 
@@ -27,34 +27,22 @@ def parse_arguments():
 
     global input_path, output_path
 
-    # fetch arguments    
-    _, input_path, output_path = sys.argv
-
     # print help message if incorrect number of arguments was specified
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 3:
         print(
-            '   python windowed_pca.py <input_path> <output_path>\n\n\
+            '\n   python windowed_pca.py <input_path> <output_path>\n\n\
             <input path>           str    path to input SAM/BAM\n\
-            <output path>          str    path to output BAM',
+            <output path>          str    path to output BAM\n',
         file=sys.stderr,
         )
         sys.exit()
 
-    # check if input file was specified and if it exists:
-    if not os.path.isfile(input_path):
-        print(
-            '\n[ERROR] Input file does not exist.',
-        file=sys.stderr
-        )
-        sys.exit()
-
-    # compile output file name:
-    if not output_path:
-        output_path = input_path[:-4] + '.simple.bam'
+    # fetch arguments    
+    _, input_path, output_path = sys.argv
 
     # print info
-    print('\n[INFO] Input file: ' + input_path + '.', file=sys.stderr)
-    print('\n[INFO] Output file: ' + output_path + '.', file=sys.stderr)
+    print('\n[INFO] Input file: ' + input_path, file=sys.stderr)
+    print('\n[INFO] Output file: ' + output_path, file=sys.stderr)
 
 
 def init_output():
@@ -166,7 +154,7 @@ def process_records(in_bam, out_bam):
 
     # print exit message and exit
     print(
-        '\n[INFO] done.',
+        '\n[INFO] done.\n',
         file=sys.stderr,
     )
 
@@ -183,6 +171,7 @@ def main():
 
     # process input records and write output
     process_records(in_bam, out_bam)
+
 
 if __name__ == '__main__':
     main()
