@@ -9,7 +9,6 @@
 
 ## File info
 __author__ = 'Moritz Blumer, 2023'
-__version__ = '1.0'
 __email__ = 'lmb215@cam.ac.uk'
 
 
@@ -154,7 +153,7 @@ def process_records(in_bam, out_bam):
 
     # print exit message and exit
     print(
-        '\n[INFO] done.\n',
+        '\n[INFO] Done\n',
         file=sys.stderr,
     )
 

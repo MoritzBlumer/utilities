@@ -163,5 +163,12 @@ def main():
     # sort by size and write output
     sort_and_save(contig_lst, output_path, contig_prefix, out_line_len, size_sort)
 
+    # print exit message
+    print(
+        '\n[INFO] Done\n',
+        file=sys.stderr,
+        )
+
+
 if __name__ == '__main__':
     main()
