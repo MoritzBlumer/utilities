@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-# Assign parameters and set defaults:
+# fetch arguments and set defaults:
 prompt=$1
 name=${2-$(date +'%Y'-'%m'-'%d'_'%H'-'%M'-'%S'_screen)}
 name=$(echo ${name} | sed 's|/|_|g')
