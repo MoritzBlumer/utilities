@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -eo pipefail
+
+# fetch arguments and set defaults:
+old_submission=$1
+
+# check if arguments were set, else exit
+if [ $# -eq 0 ]
+  then
+    echo -e "\n[ERROR] No arguments specified.\n"
+    echo -e "Usage:\n"
+    echo -e "  screener <path to old screener submission file> \n"
+    exit 1
+fi
+
+# fetch name
+name=$(echo $old_submission | cut -d'.' -f3- | rev | cut -d'.' -f2- | rev)
+
+# fetch prompt
+prompt=$(grep -A 1 "# command " $old_submission | grep -v "# command ")
+
+# re-launch screen & run submission script
+screen -d -S $name -m bash ./${old_submission}
+
+# print info message:
+echo -e "\nre-launched screen job: $name"
+echo -e "command: ${prompt}\n"
