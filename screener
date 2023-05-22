@@ -32,6 +32,9 @@ cat << EOF > ${out_prefix}.submit
 $prompt &> ${out_prefix}.out
 EOF
 
+# initiate out file
+touch ${out_prefix}.out
+
 # launch screen & run submission script
 screen -d -S $name -m bash ./${out_prefix}.submit
 
