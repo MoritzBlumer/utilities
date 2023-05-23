@@ -3,7 +3,7 @@ Collection of (hopefully) useful things
 
 # descriptions
 
-## screener
+## ```screener``` & ```re-screen```
 
 Submit jobs e.g. in a loop on a server without job scheduler.
 - usage: ```screener <"command"> <job name>```
@@ -12,9 +12,10 @@ Submit jobs e.g. in a loop on a server without job scheduler.
 - .screen/screen.name.out contains all STDERR and STDOUT
 - example: screener "echo test" test
 - make executable (chmod +x screener) and add do $PATH to call it from anywhere
+- ```re-screen <.screen/screener.*.submit>``` re-launches an existing submission file from a screener job
 
   
-## simplify_bam.py
+## ```simplify_bam.py```
 
 Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV load time; write read length to 9th field
 - dependency: pysam (https://github.com/pysam-developers/pysam)
@@ -25,7 +26,7 @@ Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV loa
 - usage: ```simplify_bam.py <input sam/bam> <output bam>```
 
                                     
-## unscaffold.py
+## ```unscaffold.py```
 
 Splits sequences in a FASTA at stretches of Ns of specified size and outputs a new FASTA
 - Treats 'N' and 'n' the same
