@@ -29,7 +29,7 @@ cat << EOF > ${out_prefix}.submit
 # time: `date`
 
 # command 
-$prompt &> ${out_prefix}.out
+$prompt 2> ${out_prefix}.out
 EOF
 
 # initiate out file
