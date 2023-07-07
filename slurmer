@@ -6,10 +6,11 @@
 
 # set defaults
 def_runtime=05:00:00
+def_mem=6G
 def_n_cores_per_task=1
 def_n_tasks=1
 def_n_nodes=1
-def_partition=normal
+def_partition=cpu
 
 # set pipefail
 set -eo pipefail
@@ -26,18 +27,19 @@ prompt=$1
 name=${2-$(date +'%Y'-'%m'-'%d'_'%H'-'%M'-'%S'_slurm-submission)}
 name=$(echo ${name} | sed 's|/|_|g')
 run_time=${3-${def_runtime}}
-n_cores_per_task=${4-${def_n_cores_per_task}}
-n_tasks=${5-${def_n_tasks}}
-n_nodes=${6-${def_n_nodes}}
-partition=${7-${def_partition}}
-add_parameters=${8}
+mem=${4-${def_mem}}
+n_cores_per_task=${5-${def_n_cores_per_task}}
+n_tasks=${6-${def_n_tasks}}
+n_nodes=${7-${def_n_nodes}}
+partition=${8-${def_partition}}
+add_parameters=${9}
 
 # check if arguments were set, else exit
 if [ $# -eq 0 ]
   then
     echo -e "\n[ERROR] No arguments specified.\n"
     echo -e "Usage:"
-    echo -e "  slurmer <prompt> <jobname> <runtime> <num_cores_per_task> <num_tasks> <num_nodes> <partition>\n"
+    echo -e "  slurmer <prompt> <jobname> <runtime> <mem> <num_cores_per_task> <num_tasks> <num_nodes> <partition>\n"
     exit 1
 fi
 
@@ -53,6 +55,7 @@ cat << EOF > .slurm/slurm.${name}.submit
 
 #SBATCH -J ${name}
 #SBATCH --time=${run_time}
+#SBATCH --mem=${mem}
 #SBATCH --cpus-per-task=${n_cores_per_task=}
 #SBATCH --ntasks=${n_tasks}
 #SBATCH --nodes=${n_nodes}
@@ -95,6 +98,7 @@ printf "\nParameters:\n"
 printf "    command:\t${prompt}\n"
 printf "    job name:\t${name}\n"
 printf "    run time:\t${run_time}\n"
+printf "    mem:\t${mem}\n"
 printf "    cores/task:\t${n_cores_per_task}\n"
 printf "    tasks:\t${n_tasks}\n"
 printf "    nodes:\t${n_nodes}\n"
