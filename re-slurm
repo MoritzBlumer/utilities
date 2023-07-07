@@ -27,6 +27,7 @@ fi
 prompt=$(sed -n '/## JOB/{n;p;}' $submission_script)
 name=$(grep "#SBATCH -J" $submission_script | cut -d' ' -f3)
 run_time=$(grep "#SBATCH --time" $submission_script | cut -d'=' -f2)
+mem=$(grep "#SBATCH --mem" $submission_script | cut -d'=' -f2)
 n_cores_per_task=$(grep "#SBATCH --cpus-per-task" $submission_script | cut -d'=' -f2)
 n_tasks=$(grep "#SBATCH --ntasks" $submission_script | cut -d'=' -f2)
 n_nodes=$(grep "#SBATCH --nodes" $submission_script | cut -d'=' -f2)
@@ -40,7 +41,7 @@ printf "\nRe-submitting $submission_script\n"
 # RE-SUBMIT
 
 # submit
-slurmer "${prompt}" $name $run_time $n_cores_per_task $n_tasks $n_nodes $partition
+slurmer "${prompt}" $name $run_time $mem $n_cores_per_task $n_tasks $n_nodes $partition
 
 # remove old .out file in case sth crashes before it is overwritten:
 rm ${submission_script%.submit}.out
