@@ -3,16 +3,28 @@ Collection of (hopefully) useful things
 
 # descriptions
 
+## ```slurmer``` & ```re-slurm```
+
+Wrapper to submit SLURM/SBATCH and organize the submission and output files
+- usage: ```slurmer <prompt> <jobname> <runtime> <num_cores_per_task> <num_tasks> <num_nodes> <partition>```
+- creates directory .slurm with files .slurm/slurm.name.submit and .slurm/slurm.name.out
+- .slurm/slurm.name.submit contains submission time and command
+- .slurm/slurm.name.out contains all STDERR and STDOUT
+- example: slurm "echo test" test
+- make executable (chmod +x slurmer) and add do $PATH to call it from anywhere
+- ```re-slurm <.slurm/slurm.*.submit>``` re-launches an existing submission file from a slurmer job
+
+
 ## ```screener``` & ```re-screen```
 
-Submit jobs e.g. in a loop on a server without job scheduler.
+Submit jobs e.g. in a loop on a server without job scheduler
 - usage: ```screener <"command"> <job name>```
 - creates directory .screen with files .screen/screen.name.submit and .screen/screen.name.out
 - .screen/screen.name.submit contains submission time and command
 - .screen/screen.name.out contains all STDERR and STDOUT
 - example: screener "echo test" test
 - make executable (chmod +x screener) and add do $PATH to call it from anywhere
-- ```re-screen <.screen/screener.*.submit>``` re-launches an existing submission file from a screener job
+- ```re-screen <.screen/screen.*.submit>``` re-launches an existing submission file from a screener job
 
   
 ## ```simplify_bam.py```
