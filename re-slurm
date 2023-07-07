@@ -1,0 +1,46 @@
+#!/bin/bash
+
+
+
+## SETUP
+
+# set pipefail
+set -eo pipefail
+
+
+
+## PARSE INPUT ARGUMENTS
+
+# obtain submission script location
+submission_script=$1
+
+# check if arguments were set, else exit:
+if [ $# -eq 0 ]
+  then
+    echo "Please specify a submission script to be re-submitted."
+    exit 1
+fi
+
+
+
+## FETCH SUBMISSION PARAMETERS
+prompt=$(sed -n '/## JOB/{n;p;}' $submission_script)
+name=$(grep "#SBATCH -J" $submission_script | cut -d' ' -f3)
+run_time=$(grep "#SBATCH --time" $submission_script | cut -d'=' -f2)
+n_cores_per_task=$(grep "#SBATCH --cpus-per-task" $submission_script | cut -d'=' -f2)
+n_tasks=$(grep "#SBATCH --ntasks" $submission_script | cut -d'=' -f2)
+n_nodes=$(grep "#SBATCH --nodes" $submission_script | cut -d'=' -f2)
+partition=$(grep "#SBATCH -p" $submission_script | cut -d' ' -f3)
+
+# print summarizing info:
+printf "\nRe-submitting $submission_script\n"
+
+
+
+# RE-SUBMIT
+
+# submit
+slurmer "${prompt}" $name $run_time $n_cores_per_task $n_tasks $n_nodes $partition
+
+# remove old .out file in case sth crashes before it is overwritten:
+rm ${submission_script%.submit}.out
