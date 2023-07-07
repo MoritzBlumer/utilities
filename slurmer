@@ -1,0 +1,103 @@
+#!/bin/bash
+
+
+
+## SETUP
+
+# set defaults
+def_runtime=05:00:00
+def_n_cores_per_task=1
+def_n_tasks=1
+def_n_nodes=1
+def_partition=normal
+
+# set pipefail
+set -eo pipefail
+
+# create .slurm dir if not there
+mkdir -p .slurm
+
+
+
+## PARSE INPUT ARGUMENTS
+
+# parse and assign defaults
+prompt=$1
+name=${2-$(date +'%Y'-'%m'-'%d'_'%H'-'%M'-'%S'_slurm-submission)}
+name=$(echo ${name} | sed 's|/|_|g')
+run_time=${3-${def_runtime}}
+n_cores_per_task=${4-${def_n_cores_per_task}}
+n_tasks=${5-${def_n_tasks}}
+n_nodes=${6-${def_n_nodes}}
+partition=${7-${def_partition}}
+add_parameters=${8}
+
+# check if arguments were set, else exit
+if [ $# -eq 0 ]
+  then
+    echo -e "\n[ERROR] No arguments specified.\n"
+    echo -e "Usage:"
+    echo -e "  slurmer <prompt> <jobname> <runtime> <num_cores_per_task> <num_tasks> <num_nodes> <partition>\n"
+    exit 1
+fi
+
+
+
+## COMPILE SUBMISSION SCRIPT
+
+cat << EOF > .slurm/slurm.${name}.submit
+#!/bin/bash
+
+
+## SBATCH
+
+#SBATCH -J ${name}
+#SBATCH --time=${run_time}
+#SBATCH --cpus-per-task=${n_cores_per_task=}
+#SBATCH --ntasks=${n_tasks}
+#SBATCH --nodes=${n_nodes}
+#SBATCH -p ${partition}
+#SBATCH -A DURBIN-SL2-CPU
+#SBATCH --mail-type=FAIL
+#SBATCH --no-requeue
+#SBATCH -o .slurm/slurm.${name}.out
+#ADDITIONAL_PARAMETERS: $add_parameters
+
+
+## JOB
+${prompt}
+
+
+## PRINT INFO TO SLURM OUT FILE
+echo -e "\n======\nINFO\n"
+echo -e "Time:\t\t\t`date`"
+echo -e "Master node:\t\t`hostname`"
+echo -e "Working directory:\t`pwd`"
+echo -e "======"
+
+
+## JOBID
+EOF
+
+
+
+## SUBMIT
+
+# submit
+job_id=$(sbatch $add_parameters .slurm/slurm.${name}.submit | cut -d ' ' -f4)
+echo -e "\nJOBID $job_id" >> .slurm/slurm.${name}.submit
+
+# print summarizing info:
+echo -e "\n======"
+echo -e "JOBID:\t\t$job_id"
+echo -e "JOB NAME:\tslurm.${name}.submit)"
+printf "\nParameters:\n"
+printf "    command:\t${prompt}\n"
+printf "    job name:\t${name}\n"
+printf "    run time:\t${run_time}\n"
+printf "    cores/task:\t${n_cores_per_task}\n"
+printf "    tasks:\t${n_tasks}\n"
+printf "    nodes:\t${n_nodes}\n"
+printf "    partition:\t${partition}\n"
+printf "    additional parameters:\t$add_parameters\n"
+echo -e "======\n"
