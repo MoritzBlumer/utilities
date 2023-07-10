@@ -60,7 +60,6 @@ cat << EOF > .slurm/slurm.${name}.submit
 #SBATCH --ntasks=${n_tasks}
 #SBATCH --nodes=${n_nodes}
 #SBATCH -p ${partition}
-#SBATCH -A DURBIN-SL2-CPU
 #SBATCH --mail-type=FAIL
 #SBATCH --no-requeue
 #SBATCH -o .slurm/slurm.${name}.out
