@@ -12,6 +12,9 @@ def_n_tasks=1
 def_n_nodes=1
 def_partition=cpu
 
+# set email address
+email=$user_email_address
+
 # set pipefail
 set -eo pipefail
 
@@ -63,6 +66,7 @@ cat << EOF > .slurm/slurm.${name}.submit
 #SBATCH --mail-type=FAIL
 #SBATCH --no-requeue
 #SBATCH -o .slurm/slurm.${name}.out
+#SBATCH --mail-user=${email}
 #ADDITIONAL_PARAMETERS: $add_parameters
 
 
