@@ -6,7 +6,7 @@ Collection of (hopefully) useful things
 ## ```slurmer``` & ```re-slurm```
 
 Wrapper to submit SLURM/SBATCH and organize the submission and output files
-- usage: ```slurmer <prompt> <jobname> <runtime> <num_cores_per_task> <num_tasks> <num_nodes> <partition>```
+- usage: ```slurmer <prompt> <jobname> <runtime> <memory> <num_cores_per_task> <num_tasks> <num_nodes> <partition>```
 - set defaults (such as run time, memory, partition, etc) and user email address in the SETUP section of the script before usage
 - creates directory .slurm with files .slurm/slurm.name.submit and .slurm/slurm.name.out
 - .slurm/slurm.name.submit contains submission time and command
