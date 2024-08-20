@@ -13,7 +13,7 @@ def_n_nodes=1
 def_partition=cpu
 
 # set email address
-email=$user_email_address
+email=${USER}@cam.ac.uk
 
 # set pipefail
 set -eo pipefail
