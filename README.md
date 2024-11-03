@@ -50,3 +50,12 @@ Splits sequences in a FASTA at stretches of Ns of specified size and outputs a n
 - for details check ```unscaffold.py --help```
 
 
+## ```mito_contamination_scan.py```
+
+Script to extract allelic depth from VCF at mitochondrial variant sites to check for sample contamination.
+- Rationale: Mitochondria are haploid, i.e. there should be no variation except random sequencing error.
+- exception: heteroplasmy (rare but possible)
+- usage: python extract_allelic_depths.py <vcf_path> <primary_ids_path> <mito_name> <mito_len> <base_error_rate> <ad_output_path> <stats_output_path>
+
+
+
