@@ -347,7 +347,8 @@ class Log():
               )
         sys.exit(1)
 
-
+# instantiate logger
+log = Log()
 
 class PCA:
 
@@ -1021,11 +1022,8 @@ class Plot:
 
 def main():
     '''
-    Execute WinPCA.
+    Execute
     '''
-
-    # instantiate logger
-    log = Log()
 
     # Parse CLI
 
@@ -1057,8 +1055,6 @@ def main():
             chrom=args_dct['chrom'],
             start=args_dct['start'],
             stop=args_dct['end'],
-            #w_size=args_dct['w_size'],
-            #w_step=args_dct['w_step'],
             skip_monomorphic=args_dct['skip_monomorphic'],
             gt_mean_impute=args_dct['gt_mean_impute'],
             vcf_pass_filter=args_dct['vcf_pass_filter'],
