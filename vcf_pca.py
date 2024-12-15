@@ -580,9 +580,10 @@ class PCA:
             self.variant_arr = np.array([x[1:] for x in self.variants],dtype=np.float32)
             self.pca()
 
-        # print exit message
+        # print message
         log.newline()
-        log.info('Writing output to files.')
+        log.info('Writing output to files')
+        log.newline()
 
         # write output
         pc_df = pd.DataFrame(self.pca_out[0])
@@ -1037,7 +1038,7 @@ def main():
     # set mode
     mode = args_dct['pca']
 
-    # mode:PCA
+    # mode: PCA
 
     if mode == 'pca':
 
@@ -1086,6 +1087,10 @@ def main():
         )
         plot.plot()
         plot.savefig()
+
+    # print exit message
+    log.info('Done')
+    log.newline()
 
 
 ## EXECUTE
