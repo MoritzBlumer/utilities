@@ -1070,6 +1070,7 @@ def main():
         # print info
         log.newline()
         log.info('Creating PCA plot')
+        log.newline()
 
         # load module & instantiate
         #from modules.plot import Plot
