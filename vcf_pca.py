@@ -807,7 +807,7 @@ class Plot:
         Save figure in HTML and/or other (PDF, SVG, PNG) format(s).
         '''
         for fmt in self.plot_fmt_lst:
-            title = f'{self.plot_pcs[0]}-{self.plot_pcs[0].replace("PC", "")}'
+            title = f'{self.plot_pcs[0]}-{self.plot_pcs[1].replace("PC", "")}'
             if fmt == 'html':
                 self.fig.write_html(f'{self.prefix}.{title}.{fmt}')
             else:
