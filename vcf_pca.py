@@ -881,10 +881,6 @@ class Plot:
         pc_b_range = max(pc_b_data) - min(pc_b_data)
         range_ratio = pc_a_range / pc_b_range
         scale_factor = ve_ratio * range_ratio
-
-        print(ve_ratio)
-        print(range_ratio)
-        print(scale_factor)
         self.pc_df[f'{self.plot_pcs[1]}_scaled'] = \
             self.pc_df[f'{self.plot_pcs[1]}'] * scale_factor
 
