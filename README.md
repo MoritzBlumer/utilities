@@ -61,7 +61,9 @@ Script to extract allelic depth from VCF at mitochondrial variant sites to check
 ## ```plot_bam_wga.py```
 
 Plot whole genome alignment from a BAM file.
-- , focus is on highlighting inversions.
+- visualize pairwise alignments of multiple chromosomes or contigs from a BAM file
+- collinear alignments in black, inversions highlighted in red, unaligned regions in grey.
+- usage: python plot_bam_alignments.py <input_path> <output_path> <reference_seq_name> <query_seq_name> <regions_file_path>
 
 
 
