@@ -64,7 +64,7 @@ Plot whole genome alignment from a BAM file.
 - visualize pairwise alignments of multiple chromosomes or contigs from a BAM file
 - collinear alignments in black, inversions highlighted in red, unaligned regions in grey.
 - usage: ```python plot_bam_alignments.py <input_path> <output_path> <faidx_path> <assoc_file_path> <regions_file_path>```
-- for details check ```unscaffold.py --help```
+- for details check ```plot_bam_alignments.py --help```
 
 
 
