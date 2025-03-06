@@ -58,4 +58,10 @@ Script to extract allelic depth from VCF at mitochondrial variant sites to check
 - usage: ```python extract_allelic_depths.py <vcf_path> <primary_ids_path> <mito_name> <mito_len> <base_error_rate> <ad_output_path> <stats_output_path>```
 
 
+## ```plot_bam_wga.py```
+
+Plot whole genome alignment from a BAM file.
+- , focus is on highlighting inversions.
+
+
 
