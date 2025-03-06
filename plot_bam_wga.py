@@ -29,14 +29,14 @@ def parse_arguments():
     if len(sys.argv) < 5:
         print(
             '   python plot_bam_alignments.py <input path> <output path> <reference seq name> \
-                                    <query seq name>\n\n\
+                                    <query seq name> <regions file path> \n\n\
             <input path>          str  path to input SAM/BAM\n\
             <output path>         str  path to output PDF\n\
             <faidx path>          str  FAIDX of reference (used to fetch chromosomes and sizes)\n\
             <seq prefix>          str  prefix of sequences in FAIDX to use (e.g. "chr")\n\
             <assoc file path>     str  path to association TSV file with columns <ref_chrom>,\n\
                                        <query_chrom>, <strand> (or: "NONE")\n\
-            <regions path>        str  path to BED file with regions and HEX code color as 4th\n\
+            <regions file path>   str  path to BED file with regions and HEX code color as 4th\n\
                                        field (or: "NONE")\n\
             ',
         file=sys.stderr,
