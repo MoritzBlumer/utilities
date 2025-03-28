@@ -109,8 +109,7 @@ def parse_beagle(input_beagle_path, output_beagle_path, sample_file_path,
                 # get indices to keep
                 keep_idx_lst = [0, 1, 2] + \
                     [i for i, x in enumerate(header) if x in keep_sample_lst]
-                print(keep_sample_lst)
-                print(keep_idx_lst)
+                
                 # write new header if not skipping
                 if not drop_header:
                     header = '\t'.join([header[i] for i in keep_idx_lst])
