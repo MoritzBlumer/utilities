@@ -71,7 +71,7 @@ Plot whole genome alignment from a BAM file.
 
 Subset a BEAGLE (or BEAGLE.gz)
 - subset to a specified set of samples (-s) and/or every nth line (-l)
-- usage: ```python subset_beagle.py <input_beagle_path> <output_beagle_path>
+- usage: ```python subset_beagle.py <input_beagle_path> <output_beagle_path>```
 - for details and options check ```subset_beagle.py --help```
 
 
