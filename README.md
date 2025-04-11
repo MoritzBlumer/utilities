@@ -75,4 +75,8 @@ Subset a BEAGLE (or BEAGLE.gz)
 - for details and options check ```subset_beagle.py --help```
 
 
+## ```vcf_pca.py```
+
+Perform PCA on genotypes (GT) in a VCF file and generate interactive/annotated plotly plots.
+
 
