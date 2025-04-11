@@ -77,6 +77,9 @@ Subset a BEAGLE (or BEAGLE.gz)
 
 ## ```vcf_pca.py```
 
-Perform PCA on genotypes (GT) in a VCF file and generate interactive/annotated plotly plots.
+Perform PCA on genotypes (GT) in a VCF file using scikit-allel and generate interactive/annotated plotly plots.
+- run ```vcf_pca.py pca``` first to perform PCA and generate output text files, then optionally ```vcf_pca.py pca``` for plotting
+- ```vcf_pca.py pca``` reads variants from a VCF and mean-imputes missing data. It can be run either for a specific region of a chromosome (```-r chr:start-stop```) of for the entire file if ```-r```is not specified. A subset of samples in the vcf can be specified with ```-s``` and the minor allele frequency threshold set with ```-m``(default: 0.01). 
+
 
 
