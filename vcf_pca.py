@@ -96,8 +96,7 @@ class CLI:
         # positional arguments
         pca_parser.add_argument(
             dest='variant_file_path', metavar='<VARIANT_FILE>', help='Path to'
-            ' variant file (optionally gzipped VCF, TSV or BEAGLE; see'
-            ' documentation for input file specifications).')
+            ' (optionally gzipped) VCF file.')
         self.shared_arguments(pca_parser)
 
         # optional arguments
