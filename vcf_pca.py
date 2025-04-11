@@ -114,8 +114,8 @@ class CLI:
             '"chrom:start-end".')
         pca_parser.add_argument(
             '-s', '--samples', dest='samples', required=False, metavar='\b',
-            help='''Comma-separated list of samples to include or file with one'
-            ' sample per line.''')
+            help='Comma-separated list of samples to include or file with one'
+            ' sample per line.')
 
 
     def plot(self):
