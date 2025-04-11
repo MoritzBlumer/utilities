@@ -78,8 +78,10 @@ Subset a BEAGLE (or BEAGLE.gz)
 ## ```vcf_pca.py```
 
 Perform PCA on genotypes (GT) in a VCF file using scikit-allel and generate interactive/annotated plotly plots.
-- run ```vcf_pca.py pca``` first to perform PCA and generate output text files, then optionally ```vcf_pca.py pca``` for plotting
-- ```vcf_pca.py pca``` reads variants from a VCF and mean-imputes missing data. It can be run either for a specific region of a chromosome (```-r chr:start-stop```) of for the entire file if ```-r```is not specified. A subset of samples in the vcf can be specified with ```-s``` and the minor allele frequency threshold set with ```-m``(default: 0.01). 
+- dependencies: scikit-allel and plotly
+- run ```vcf_pca.py pca``` first to perform PCA and generate output text files, then optionally ```vcf_pca.py plot``` for plotting
+- ```vcf_pca.py pca``` reads variants from a VCF file, mean-imputes potential missing variant calls and performs PCA using scikit-allel. It can be run either for a specific region of a chromosome (```-r chr:start-stop```) of for the entire file if ```-r``` is not specified. A subset of samples in the VCF can be specified with ```-s``` and the minor allele frequency threshold set with ```-m``` (default: 0.01). The ```pca```module generates two output files, one containing the eigenvectors, the other containing the eigenvalues.
+- ```vcf_pca.py plot``` reads these output files and creates an interactive HTML plot (and/or regular PDF, see ```-f```). ```-p```can be used to specify the proncipal components to plot, ```-m```to supply metadata that are used to annotate the HTML plot (the first column must contain the same sample IDs as used in the VCF file). See ```vcf_pca.py plot -h``` for more option, including reflecting data along PC axes, setting plot colors for groups of samples or using a continuous color scheme based on a numeric metadata column.
 
 
 
