@@ -9,7 +9,7 @@
 
 
 ## FILE INFO
-__author__ = 'Moritz Blumer, 2023'
+__author__ = 'Moritz Blumer, 2025'
 __email__ = 'lmb215@cam.ac.uk'
 
 
