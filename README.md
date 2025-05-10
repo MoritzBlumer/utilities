@@ -84,4 +84,12 @@ Perform PCA on genotypes (GT) in a VCF file using scikit-allel and generate inte
 - ```vcf_pca.py plot``` reads these output files and creates an interactive HTML plot (and/or regular PDF, see ```-f```). ```-p```can be used to specify the principal components to plot, ```-m``` to supply a metadata file which will be used to annotate the HTML plot (the first column must contain the same sample IDs as used in the VCF file). See ```vcf_pca.py plot -h``` for more option, including reflecting data along PC axes, setting plot colors for groups of samples or using a continuous color scheme based on a numeric metadata column.
 
 
+## ```trim_circ_seq.py```
+
+Trim trailing sequence from a linearized circular DNA assembly by identifying and removing the region that matches the start of the sequence.
+- usage: ```python trim_circ_seq.py <input_path> <seed_length> <output_path>```
+- input/output FASTA can be gzipped
+- <seed_length> is the number of leading nucleotides to search for. Specifying 50 would result in any trailing sequence including the second second exact match of the first 50 nucleotides to be deleted.
+- specifying "-" as <output_path> prints to STDOUT
+
 
