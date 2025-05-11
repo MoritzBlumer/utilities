@@ -54,7 +54,7 @@ terminate = None
 
 # try all k values from seed_len_max to seed_len_min
 for k in range(seed_len_min, seed_len_max)[::-1]:
-
+    
     # infer search string
     search_string = seq[0:k]
     match_lst = [m.start() for m in re.finditer(search_string, seq)]
@@ -74,7 +74,6 @@ for k in range(seed_len_min, seed_len_max)[::-1]:
     if len(match_lst) > 2:
         skip = k+1
         for kk in range(seed_len_min, seed_len_max)[::-1]:
-            print(kk)
             # infer search string
             search_string = seq[skip:kk+skip]
             match_lst = [m.start() for m in re.finditer(search_string, seq)]
@@ -85,6 +84,7 @@ for k in range(seed_len_min, seed_len_max)[::-1]:
                 terminate = True
                 mismatches = 1
                 break
+        break
 
 # if no unique second match could be found for the specified k range and 
 # allowing for one mismatch, exit with error message
@@ -105,7 +105,7 @@ if mismatches == 0:
     )
 else:
     print(
-    f'[DONE] {input_path}: k={kk-skip}; {mismatches} mismatch.',
+    f'[DONE] {input_path}: k={kk+skip}; {mismatches} mismatch.',
     flush=True,
     file=sys.stderr,
     )
