@@ -87,7 +87,7 @@ Perform PCA on genotypes (GT) in a VCF file using scikit-allel and generate inte
 ## ```trim_circ_seq.py```
 
 Trim trailing sequence from a linearized circular DNA assembly by identifying and removing the region that matches the start of the sequence.
-- usage: ```python trim_circ_seq.py <input_path> <seed_length> <output_path>```
+- usage: ```python trim_circ_seq.py <input_path> <output_path> <seed_length>```
 - input/output FASTA can be gzipped
 - ```seed_length``` is the number of leading nucleotides to search for. Specifying 50 would result in any trailing sequence including the second second exact match of the first 50 nucleotides to be deleted. Small values like 11 are often sufficient in vertebrate mitochondria.
 - specifying "-" as ```output_path``` prints to STDOUT
