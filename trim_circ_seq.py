@@ -4,6 +4,7 @@
 #
 # This script trims trailing sequence from a linearized circular DNA assembly 
 # by identifying and removing the region that matches the start of the sequence.
+# Allows one mismatch.
 
 # import packages
 import sys
@@ -11,38 +12,30 @@ import os
 import re
 import gzip
 
-# CLI & help
-global input_path, output_path, seed_length
+# set seed length ro start with
+seed_len_max = 50
+seed_len_min = 5
 
-if len(sys.argv) < 4:
+# CLI & help
+global input_path, output_path
+
+if len(sys.argv) < 3:
     print(
         '\n   python trim_circ_seq.py <input_path> <seed_length> <output_path>\n\n\
         <input_path>          str  path to input FASTA\n\
         <output_path>         str  path to output FASTA ("-" for STDOUT)\n\
-        <seed_length>         int  number of bp at start of sequence to query\n\
         ',
     file=sys.stderr,
     )
     sys.exit()
 
 # fetch arguments    
-_, input_path, output_path, seed_length = sys.argv
-
-# convert optional paths to NONE bool if "NONE"
-try:
-    seed_length = int(seed_length)
-except:
-    print(
-        '\n[ERROR] <seed_length> must be an integer.', 
-        flush=True,
-        file=sys.stderr,
-    )
-    sys.exit()
+_, input_path, output_path = sys.argv
 
 # check if input file was specified and exists
 if not os.path.isfile(input_path):
     print(
-        '\n[ERROR] {input_path} does not exist.',
+        f'\n[ERROR] {input_path} does not exist.\n',
         flush=True,
         file=sys.stderr,
     )
@@ -56,27 +49,66 @@ fasta = read_func(input_path, 'r')
 header = fasta.readline().strip()
 seq = fasta.read().replace('\n', '')
 
-# infer search string
-search_string = seq[0:seed_length]
-match_lst = [m.start() for m in re.finditer(search_string, seq)]
+# initiate terminate
+terminate = None
 
-if len(match_lst) == 1:
+# try all k values from seed_len_max to seed_len_min
+for k in range(seed_len_min, seed_len_max)[::-1]:
+
+    # infer search string
+    search_string = seq[0:k]
+    match_lst = [m.start() for m in re.finditer(search_string, seq)]
+
+    # if unique second match found, terminate
+    if len(match_lst) == 2:
+        seq = seq[0:match_lst[1]]
+        terminate = True
+        mismatches = 0
+        break
+    
+    # if more than two unique matches are found this suggests a mismatch
+    # (= difference between leading and trailing assembly). Try shifting the
+    # search string to k + 1 and if finding a unique second match, trim off
+    # the trailing sequence, offsetting again to the entire string incl. the
+    # single mismatch
+    if len(match_lst) > 2:
+        skip = k+1
+        for k in range(seed_len_min, seed_len_max)[::-1]:
+
+            # infer search string
+            search_string = seq[skip:k+skip]
+            match_lst = [m.start() for m in re.finditer(search_string, seq)]
+
+            # if unique second match found, terminate
+            if len(match_lst) == 2:
+                seq = seq[0:match_lst[1]-skip]
+                terminate = True
+                mismatches = 1
+                break
+
+# if no unique second match could be found for the specified k range and 
+# allowing for one mismatch, exit with error message
+if not terminate:
     print(
-        f'\n[ERROR] {input_path}: no other matches found, consider reducing <seed_length>.',
+        f'\n[ERROR] {input_path}: No trailing duplication found.\n',
         flush=True,
         file=sys.stderr,
     )
     sys.exit()
 
-elif len(match_lst) > 2:
+# print info
+if mismatches == 0:
     print(
-        f'\n[ERROR] {input_path}: more than two matches found, consider increasing <seed_length>',
-        flush=True,
-        file=sys.stderr,
+    f'[DONE] {input_path}: k={k}.',
+    flush=True,
+    file=sys.stderr,
     )
-    sys.exit()
 else:
-    seq = seq[0:match_lst[1]]
+    print(
+    f'[DONE] {input_path}: k={k}; {mismatches} mismatch.',
+    flush=True,
+    file=sys.stderr,
+    )
 
 # print output
 if output_path == '-':
