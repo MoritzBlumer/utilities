@@ -87,9 +87,10 @@ Perform PCA on genotypes (GT) in a VCF file using scikit-allel and generate inte
 ## ```trim_circ_seq.py```
 
 Trim trailing sequence from a linearized circular DNA assembly by identifying and removing the region that matches the start of the sequence.
-- usage: ```python trim_circ_seq.py <input_path> <output_path> <seed_length>```
-- input/output FASTA can be gzipped
-- ```seed_length``` is the number of leading nucleotides to search for. Specifying 50 would result in any trailing sequence including the second second exact match of the first 50 nucleotides to be deleted. Small values like 11 are often sufficient in vertebrate mitochondria.
-- specifying "-" as ```output_path``` prints to STDOUT
+Tries to find a single secondary unique match of the leading k base pairs, assuming that this is where the assembly would begin to overlap if circularized. Starting from k=50, k is reduced by one with each unsuccessful iteration. If a unique secondary match if found it is trimmed from the output as well as any trailing sequence. If more than one unique secondary match is found before a k yields exactly one secondary unique match, there might be a mismatch between in the flanking/overlapping assembly portions. Therefore, the search string is shifted to k+1 and another run is performed. If a unique secondary match is now found for the shifted search string, this region plus the leading offset (which includes the mismatch) and any trailing region is trimmed off. If a mismatch is found, this is reported in the output. If no second unique match can be found for any k >= 5 (allowing for one mismatch) the program exits with an error message.
+- usage: ```python trim_circ_seq.py <input_path> <output_path>```
+- input/output FASTA may be gzipped
+- the search range for k is set to 50..5 and can be updated in the script (seed_len_max and seed_len_min)
+
 
 
