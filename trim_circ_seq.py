@@ -12,9 +12,9 @@ import os
 import re
 import gzip
 
-# set seed length ro start with
-seed_len_max = 50
-seed_len_min = 5
+# set k range
+k_max = 50
+k_min = 5
 
 # CLI & help
 global input_path, output_path
@@ -52,8 +52,8 @@ seq = fasta.read().replace('\n', '')
 # initiate terminate
 terminate = None
 
-# try all k values from seed_len_max to seed_len_min
-for k in range(seed_len_min, seed_len_max)[::-1]:
+# try all k values from k_max to k_min
+for k in range(k_min, k_max+1)[::-1]:
     
     # infer search string
     search_string = seq[0:k]
@@ -73,7 +73,7 @@ for k in range(seed_len_min, seed_len_max)[::-1]:
     # single mismatch
     if len(match_lst) > 2:
         skip = k+1
-        for kk in range(seed_len_min, seed_len_max)[::-1]:
+        for kk in range(k_min, k_max+1)[::-1]:
             # infer search string
             search_string = seq[skip:kk+skip]
             match_lst = [m.start() for m in re.finditer(search_string, seq)]
