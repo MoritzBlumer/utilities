@@ -32,12 +32,20 @@ _, input_path, seed_length, output_path = sys.argv
 try:
     seed_length = int(seed_length)
 except:
-    print('\n[ERROR] <seed_length> must be an integer.', file=sys.stderr)
+    print(
+        '\n[ERROR] <seed_length> must be an integer.', 
+        flush=True,
+        file=sys.stderr,
+    )
     sys.exit()
 
 # check if input file was specified and exists
 if not os.path.isfile(input_path):
-    print('\n[ERROR] Input file does not exist.', file=sys.stderr)
+    print(
+        '\n[ERROR] {input_path} does not exist.',
+        flush=True,
+        file=sys.stderr,
+    )
     sys.exit()
 
 # read input FASTA
@@ -53,12 +61,20 @@ search_string = seq[0:seed_length]
 match_lst = [m.start() for m in re.finditer(search_string, seq)]
 
 if len(match_lst) == 1:
-    print(f'[ERROR] no other matches found, consider reducing <seed_length>.')
-    sys.exit(flush=True, file=sys.stderr)
+    print(
+        f'\n[ERROR] {input_path}: no other matches found, consider reducing <seed_length>.',
+        flush=True,
+        file=sys.stderr,
+    )
+    sys.exit()
 
 elif len(match_lst) > 2:
-    print(f'[ERROR] more than two matches found, consider increasing <seed_length>')
-    sys.exit(flush=True, file=sys.stderr)
+    print(
+        f'\n[ERROR] {input_path}: more than two matches found, consider increasing <seed_length>',
+        flush=True,
+        file=sys.stderr,
+    )
+    sys.exit()
 else:
     seq = seq[0:match_lst[1]]
 
