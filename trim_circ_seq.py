@@ -64,8 +64,8 @@ else:
 
 # print output
 if output_path == '-':
-    print(f'{header}\n{seq}', file=sys.stdout)
+    print(f'{header}\n{seq}\n', file=sys.stdout)
 else:
     read_func = gzip.open if output_path.endswith('.gz') else open
     with read_func(output_path, 'w') as out_fasta:
-        out_fasta.write(f'{header}\n{seq}')
+        out_fasta.write(f'{header}\n{seq}\n')
