@@ -12,21 +12,21 @@ import re
 import gzip
 
 # CLI & help
-global input_path, seed_length, output_path
+global input_path, output_path, seed_length
 
 if len(sys.argv) < 4:
     print(
         '\n   python trim_circ_seq.py <input_path> <seed_length> <output_path>\n\n\
         <input_path>          str  path to input FASTA\n\
-        <seed_length>         int  number of bp at start of sequence to query\n\
         <output_path>         str  path to output FASTA ("-" for STDOUT)\n\
+        <seed_length>         int  number of bp at start of sequence to query\n\
         ',
     file=sys.stderr,
     )
     sys.exit()
 
 # fetch arguments    
-_, input_path, seed_length, output_path = sys.argv
+_, input_path, output_path, seed_length = sys.argv
 
 # convert optional paths to NONE bool if "NONE"
 try:
