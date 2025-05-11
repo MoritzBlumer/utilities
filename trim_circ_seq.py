@@ -73,10 +73,10 @@ for k in range(seed_len_min, seed_len_max)[::-1]:
     # single mismatch
     if len(match_lst) > 2:
         skip = k+1
-        for k in range(seed_len_min, seed_len_max)[::-1]:
+        for kk in range(seed_len_min, seed_len_max)[::-1]:
 
             # infer search string
-            search_string = seq[skip:k+skip]
+            search_string = seq[skip:kk+skip]
             match_lst = [m.start() for m in re.finditer(search_string, seq)]
 
             # if unique second match found, terminate
@@ -105,7 +105,7 @@ if mismatches == 0:
     )
 else:
     print(
-    f'[DONE] {input_path}: k={k}; {mismatches} mismatch.',
+    f'[DONE] {input_path}: k={kk-skip}; {mismatches} mismatch.',
     flush=True,
     file=sys.stderr,
     )
