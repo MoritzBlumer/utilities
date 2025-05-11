@@ -74,7 +74,7 @@ for k in range(seed_len_min, seed_len_max)[::-1]:
     if len(match_lst) > 2:
         skip = k+1
         for kk in range(seed_len_min, seed_len_max)[::-1]:
-
+            print(kk)
             # infer search string
             search_string = seq[skip:kk+skip]
             match_lst = [m.start() for m in re.finditer(search_string, seq)]
