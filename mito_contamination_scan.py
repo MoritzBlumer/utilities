@@ -33,7 +33,7 @@ def parse_command_line_arguments():
         print('\t\t<mito_len>\t\tstr\length of the mitochondrial sequence', file=sys.stderr)
         print('\t\t<base_error_rate>\tstr\tsequencing error rate, e.g. 0.001', file=sys.stderr)
         print('\t\t<ad_output_path>\tstr\tpath to main output TSV that will contain per position allelic depth data for all input samples', file=sys.stderr)
-        print('\t\t<stats_output_path>\tstr\tpath to per-sample summary_stats TSV', file=sys.stderr)
+        print('\t\t<stats_output_path>\tstr\tpath to per-sample summary_stats TSV\n', file=sys.stderr)
         sys.exit()
     
     # fetch arguments
