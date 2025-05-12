@@ -26,7 +26,7 @@ def parse_command_line_arguments():
     # print help message if incorrect number of arguments was specified
     if len(sys.argv) != 8:
         print('\nUsage:', file=sys.stderr)
-        print('\tpython extract_allelic_depths.py <vcf_path> <primary_ids_path> <mito_name> <mito_len> <base_error_rate> <ad_output_path> <stats_output_path>\n', file=sys.stderr)
+        print('\tpython mito_contamination_scan.py <vcf_path> <primary_ids_path> <mito_name> <mito_len> <base_error_rate> <ad_output_path> <stats_output_path>\n', file=sys.stderr)
         print('\t\t<vcf_path>\tstr\tpath to VCF/BCF that contains mitochondrion', file=sys.stderr)
         print('\t\t<primary_ids_path>\t\tstr\tpath to file with one primary_id per line to be included', file=sys.stderr)
         print('\t\t<mito_name>\t\tstr\tname of the mitochondrial scaffold', file=sys.stderr)
@@ -34,7 +34,8 @@ def parse_command_line_arguments():
         print('\t\t<base_error_rate>\tstr\tsequencing error rate, e.g. 0.001', file=sys.stderr)
         print('\t\t<ad_output_path>\tstr\tpath to main output TSV that will contain per position allelic depth data for all input samples', file=sys.stderr)
         print('\t\t<stats_output_path>\tstr\tpath to per-sample summary_stats TSV', file=sys.stderr)
-
+        sys.exit()
+    
     # fetch arguments
     _, vcf_path, primary_ids_path, mito_name, mito_len, base_error_rate, \
         ad_output_path, stats_output_path  = sys.argv
