@@ -62,8 +62,8 @@ def cli():
 
     global input_path, output_path
 
-    parser = argparse.ArgumentParser(description="Batch-color correct RAW \
-        image files.")
+    parser = argparse.ArgumentParser(description="Plot different color" \
+        " ranges separately below the original image.")
 
     # add arguments
     parser.add_argument('input_path', type=str, help='input PNG or JPG')
@@ -268,3 +268,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
