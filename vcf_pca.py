@@ -977,7 +977,7 @@ class Plot:
         # plot colorscale instead of per-sample legend for numeric metadata
         if self.numeric:
             val_lst = [
-                float(x) for x in self.data_df[self.color_by] \
+                float(x) for x in self.pc_df[self.color_by] \
                     if not x in self.na_lst
             ]
             min_val = min(val_lst)
