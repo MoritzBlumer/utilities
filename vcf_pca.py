@@ -992,11 +992,11 @@ class Plot:
                         thickness=10,
                         title=dict(
                             text=self.color_by,
-                            font=dict(size=100),
+                            font=dict(size=10),
                             side='right'
                         ),
                         tickvals=[min_val, max_val],
-                        tickfont=dict(size=100),
+                        tickfont=dict(size=10),
                     ),
                 ),
             )
