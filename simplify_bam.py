@@ -29,7 +29,7 @@ def parse_arguments():
     # print help message if incorrect number of arguments was specified
     if len(sys.argv) < 3:
         print(
-            '\n   python windowed_pca.py <input_path> <output_path>\n\n\
+            '\n   python simplify_bam.py <input_path> <output_path>\n\n\
             <input path>           str    path to input SAM/BAM\n\
             <output path>          str    path to output BAM\n',
         file=sys.stderr,
