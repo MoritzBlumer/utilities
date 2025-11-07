@@ -28,8 +28,8 @@ def parse_arguments():
     # print help message if incorrect number of arguments was specified
     if len(sys.argv) < 5:
         print(
-            '   python plot_bam_alignments.py <input_path> <output_path> <faidx_path> \
-                                    <assoc_file path> <regions_file path>\n\n\
+            '   plot_bam_wgas.py <input_path> <output_path> <faidx_path> \
+                        <assoc_file path> <regions_file path>\n\n\
             <input_path>          str  path to input SAM/BAM\n\
             <output_path>         str  path to output PDF\n\
             <faidx_path>          str  FAIDX of reference (used to fetch chromosomes and sizes)\n\
