@@ -3,6 +3,16 @@ Collection of (hopefully) useful things
 
 # descriptions
 
+## ```count_alleles.py```
+
+Simple script to count missing (.), A, C, G, T alleles per site from a VCF.
+- reads VCF (with or without header) from STDIN and prints to STDOUT
+- input: SNPs (invariant, bialellic, multiallelic)
+- only for diploid samples, phased (|) or unphased (/)
+- output: TSV with CHROM, POS . A C G T counts
+- set '-h' flag to output a header line
+
+
 ## ```mito_contamination_scan.py```
 
 Script to extract allelic depth from VCF at mitochondrial variant sites to check for sample contamination.
