@@ -337,58 +337,29 @@ def plot_alignments(ax, alignments_lst, r_name, r_start, r_stop, q_seq_len, fwd_
     #ax.set_xticks([x for x in ax.get_xticks()])
     ax.set_xticklabels([int(x/1000000) for x in ax.get_xticks()])
 
-    # plot inversion boundaries if specified
-    if regions_path:
-        if chrom in regions_dct.keys():
-            ax.fill(
-                (
-                    regions_dct[chrom]['start'],
-                    regions_dct[chrom]['end'],
-                    regions_dct[chrom]['end'],
-                    regions_dct[chrom]['start'],
-                ),
-                (-5, -5, -15, -15),
-                color=regions_dct[chrom]['color'], alpha=1,
-                linewidth=0,
-            )
-        if chrom == 'chr2':
-            ax.fill(
-                (
-                    regions_dct['chr2_s']['start'],
-                    regions_dct['chr2_s']['end'],
-                    regions_dct['chr2_s']['end'],
-                    regions_dct['chr2_s']['start'],
-                ),
-                (-5, -5, -15, -15),
-                color=regions_dct['chr2_s']['color'], alpha=1,
-                linewidth=0,
-            )
-        if chrom == 'chr20':
-            ax.fill(
-                (
-                    regions_dct['chr20_1']['start'],
-                    regions_dct['chr20_1']['end'],
-                    regions_dct['chr20_1']['end'],
-                    regions_dct['chr20_1']['start'],
-                ),
-                (-5, -5, -15, -15),
-                color=regions_dct['chr20_1']['color'], alpha=1,
-                linewidth=0,
-            )
-            ax.fill(
-                (
-                    regions_dct['chr20_2']['start'],
-                    regions_dct['chr20_2']['end'],
-                    regions_dct['chr20_2']['end'],
-                    regions_dct['chr20_2']['start'],
-                ),
-                (-5, -5, -15, -15),
-                color=regions_dct['chr20_2']['color'], alpha=1,
-                linewidth=0,
-            )
-
+    # plot regions
+    min_width = (r_stop - r_start) * 0.001
+    for region in regions_dct.get(chrom, []):
+        region_start = region['start']
+        region_end = region['end']
+        if region_end-region_start < min_width:
+            region_center = region_start + (region_end-region_start)/2
+            region_start = region_center - min_width/2
+            region_end = region_center + min_width/2
+        ax.fill(
+            (
+                region_start,
+                region_end,
+                region_end,
+                region_start,
+            ),
+            (-5, -5, -15, -15),
+            color=region['color'], 
+            alpha=1,
+            linewidth=0,
+        )
+    
     return ax
-
 
 ## Main
 
@@ -411,10 +382,13 @@ if assoc_file_path:
 else:
     assoc_dct = None
 
-# read in inversion coordinates if specified
+# read in regions if specified
 if regions_path:
     regions_df = pd.read_csv(regions_path, sep='\t', names=['chrom', 'start', 'end', 'color'], index_col=0)
-    regions_dct = regions_df.to_dict(orient='index')
+    regions_dct = {
+        chrom: group[['start', 'end', 'color']].to_dict('records')
+        for chrom, group in regions_df.groupby('chrom')
+    }
 else:
     regions_dct = None
 
