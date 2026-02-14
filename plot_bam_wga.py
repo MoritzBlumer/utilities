@@ -23,7 +23,7 @@ def parse_arguments():
     Parse command line arguments & print help message if # of arguments is incorrect
     '''
 
-    global input_path, output_path, faidx_path, assoc_file_path, regions_path
+    global input_path, output_path, faidx_path, assoc_file_path, ref_regions_path, query_regions_path
 
     # print help message if incorrect number of arguments was specified
     if len(sys.argv) < 5:
@@ -33,21 +33,24 @@ def parse_arguments():
             <input_path>          str  path to input SAM/BAM\n\
             <output_path>         str  path to output PDF\n\
             <faidx_path>          str  FAIDX of reference (used to fetch chromosomes and sizes)\n\
-            <assoc_file path>     str  path to association TSV file with columns <ref_chrom>,\n\
-                                       <query_chrom>, <strand> (or: "NONE")\n\
-            <regions_file path>   str  path to BED file with regions and HEX code color as 4th\n\
-                                       field (or: "NONE")\n\
+            <assoc_file>          str  [or: "NONE"] path to association TSV file with columns\n\
+                                        <ref_chrom>, <query_chrom>, <strand>\n\
+            <ref_regions_path>    str  [or: "NONE"] path to BED file with reference regions and\n\
+                                        HEX code color as 4th field \n\'\
+            <query_regions_path>  str  [or: "NONE"] path to BED file with query regions and\n\
+                                        HEX code color as 4th field \n\'\
             ',
         file=sys.stderr,
         )
         sys.exit()
 
     # fetch arguments    
-    _, input_path, output_path, faidx_path, assoc_file_path, regions_path = sys.argv
+    _, input_path, output_path, faidx_path, assoc_file_path, ref_regions_path, query_regions_path = sys.argv
 
     # convert optional paths to NONE bool if "NONE"
-    regions_path = None if regions_path == "NONE" else regions_path
     assoc_file_path = None if assoc_file_path == "NONE" else assoc_file_path
+    ref_regions_path = None if ref_regions_path == "NONE" else ref_regions_path
+    query_regions_path = None if query_regions_path == "NONE" else query_regions_path
 
     # check if input file was specified and if it exists:
     if not os.path.isfile(input_path):
@@ -59,7 +62,10 @@ def parse_arguments():
     if assoc_file_path and not os.path.isfile(assoc_file_path):
         print('\n[ERROR] Association file does not exist.', file=sys.stderr)
         sys.exit()
-    if regions_path and not os.path.isfile(regions_path):
+    if ref_regions_path and not os.path.isfile(ref_regions_path):
+        print('\n[ERROR] Regions BED file does not exist.', file=sys.stderr)
+        sys.exit()
+    if query_regions_path and not os.path.isfile(query_regions_path):
         print('\n[ERROR] Regions BED file does not exist.', file=sys.stderr)
         sys.exit()
 
@@ -165,7 +171,7 @@ def parse_alignments(in_bam, q_name, q_seq_len_from_tlen):
 
 
 def plot_alignments(ax, alignments_lst, r_name, r_start, r_stop, q_seq_len, fwd_aln_col, \
-                    rev_aln_col, diff_chrom_col, assoc_dct, regions_dct):
+                    rev_aln_col, diff_chrom_col, assoc_dct, ref_regions_dct):
     '''
     Plot all query alignments to the reference either forward or reverse
     '''
@@ -339,7 +345,28 @@ def plot_alignments(ax, alignments_lst, r_name, r_start, r_stop, q_seq_len, fwd_
 
     # plot regions
     min_width = (r_stop - r_start) * 0.001
-    for region in regions_dct.get(chrom, []):
+    # ref regions
+    for region in ref_regions_dct.get(chrom, []):
+        region_start = region['start']
+        region_end = region['end']
+        if region_end-region_start < min_width:
+            region_center = region_start + (region_end-region_start)/2
+            region_start = region_center - min_width/2
+            region_end = region_center + min_width/2
+        ax.fill(
+            (
+                q_offset + region_start,
+                q_offset + region_end,
+                q_offset + region_end,
+                q_offset + region_start,
+            ),
+            (-5, -5, -15, -15),
+            color=region['color'], 
+            alpha=1,
+            linewidth=0,
+        )
+    # query regions
+    for region in query_regions_dct.get(chrom, []):
         region_start = region['start']
         region_end = region['end']
         if region_end-region_start < min_width:
@@ -353,11 +380,12 @@ def plot_alignments(ax, alignments_lst, r_name, r_start, r_stop, q_seq_len, fwd_
                 region_end,
                 region_start,
             ),
-            (-5, -5, -15, -15),
+            (215, 215, 205, 205),
             color=region['color'], 
             alpha=1,
             linewidth=0,
         )
+     
     
     return ax
 
@@ -382,15 +410,25 @@ if assoc_file_path:
 else:
     assoc_dct = None
 
-# read in regions if specified
-if regions_path:
-    regions_df = pd.read_csv(regions_path, sep='\t', names=['chrom', 'start', 'end', 'color'], index_col=0)
-    regions_dct = {
+# read in ref regions if specified
+if ref_regions_path:
+    ref_regions_df = pd.read_csv(ref_regions_path, sep='\t', names=['chrom', 'start', 'end', 'color'], index_col=0)
+    ref_regions_dct = {
         chrom: group[['start', 'end', 'color']].to_dict('records')
-        for chrom, group in regions_df.groupby('chrom')
+        for chrom, group in ref_regions_df.groupby('chrom')
     }
 else:
-    regions_dct = None
+    ref_regions_dct = None
+
+# read in query regions if specified
+if query_regions_path:
+    query_regions_df = pd.read_csv(query_regions_path, sep='\t', names=['chrom', 'start', 'end', 'color'], index_col=0)
+    query_regions_dct = {
+        chrom: group[['start', 'end', 'color']].to_dict('records')
+        for chrom, group in query_regions_df.groupby('chrom')
+    }
+else:
+    query_regions_dct = None
 
 # fetch chromosomes
 if assoc_dct:
@@ -434,7 +472,7 @@ for i, chrom in zip(range(n_plots), chroms):
     in_bam, q_seq_len_from_tlen= init()
     alignments_lst, q_seq_len = parse_alignments(in_bam, assoc_dct[chrom]['query_chrom'], q_seq_len_from_tlen)
     ax = plot_alignments(ax, alignments_lst, chrom, r_start, r_stop, q_seq_len, fwd_aln_col, \
-                         rev_aln_col, diff_chrom_col, assoc_dct, regions_dct)
+                         rev_aln_col, diff_chrom_col, assoc_dct, ref_regions_dct)
     if assoc_file_path:
         ax.set_title(chrom + ' (' + assoc_dct[chrom]['strand'] + ')', loc='left', fontweight='bold', pad=-10)
     else:
