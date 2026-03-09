@@ -10,27 +10,31 @@ Type stratified haplotype pattern in a single winpca window.
 import pandas as pd
 import sys
 
-_, pc_tsv_path, pos, u_threshold, l_threshold = sys.argv
-
-# convert pos and thresholds to numbers
-try:
-    pos, u_threshold, l_threshold = \
-        float(pos), float(u_threshold), float(l_threshold)
-except:
-    print(
-         '[ERROR] pos, l_threshold & u_threshold must all be numbers but the'
-        f' following values were providedwere: {pos}, {l_threshold} &'
-        f'{u_threshold}',
-        flush=True,
-        file=sys.stderr,
-    )
-    sys.exit()
-
 
 
 ## MAIN
 
 def main():
+
+    # parse arguments
+    if len(sys.argv) == 1:
+        sys.exit()
+    else:
+        _, pc_tsv_path, pos, u_threshold, l_threshold = sys.argv
+
+    # convert pos and thresholds to numbers
+    try:
+        pos, u_threshold, l_threshold = \
+            float(pos), float(u_threshold), float(l_threshold)
+    except:
+        print(
+            '[ERROR] pos, l_threshold & u_threshold must all be numbers but the'
+            f' following values were providedwere: {pos}, {l_threshold} &'
+            f'{u_threshold}',
+            flush=True,
+            file=sys.stderr,
+        )
+        sys.exit()
 
     # read data
     pc_df = pd.read_csv(
