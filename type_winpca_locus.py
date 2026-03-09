@@ -16,6 +16,10 @@ import sys
 
 def main():
 
+    '''
+    Main.
+    '''
+
     # parse arguments
     if len(sys.argv) == 1:
         sys.exit()
