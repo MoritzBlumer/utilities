@@ -13,6 +13,16 @@ Simple script to count missing (.), A, C, G, T alleles per site from a VCF.
 - set '-h' flag to output a header line
 
 
+## ```type_winpca_locus.py```
+
+Script to genotype PC values in a single WinPCA output window using two thresholds.
+usage: ```python type_winpca_locus.py <pc_tsv> <window_pos> <upper_threshold> <lower_threshold>```
+- reads WinPCA PC output file (.pc_*.tsv.gz) (```<pc_tsv>```)
+- takes a single window position (```<window_pos>```) plus  ```<upper_threshold>``` and ```<lower_threshold>```
+- writes ```sample_id  pc_value  typing```to STDOUT where pc_value larger than ```<upper_threshold>``` is typed as ```2```, lower than ```<lower_threshold>``` typed as ```0```, and anything in between typed as ```1``` (```1``` is inclusive of both thresholds)
+- can be used to type inversions or other divergent haplotypes
+
+
 ## ```mito_contamination_scan.py```
 
 Script to extract allelic depth from VCF at mitochondrial variant sites to check for sample contamination.
