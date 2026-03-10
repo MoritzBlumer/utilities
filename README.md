@@ -45,22 +45,20 @@ Plot whole genome alignment from BAM.
 
 Plot whole genome alignment(s) from PAF.
 -  successor for ```plot_bam_wga.py```
--  pairwise genome alignments in ```.PAF``` format may be created with [minimap](https://github.com/lh3/minimap2) or the even faster [FastGA](https://github.com/thegenemyers/FASTGA)
+- useful to examine assembly completeness by aligning a primary and secondary assembly to each other, or both to a shared reference
+-  input pairwise genome alignments in ```.PAF``` format may be created with [minimap](https://github.com/lh3/minimap2) or the even faster [FastGA](https://github.com/thegenemyers/FASTGA)
 -  visualizes all reference genome sequences (chromosomes + contigs) and likewise the aligned assembly's sequences on top and connects pairwise alignment blocks
 -  optionally, a second aligned assembly can be visualized by specifying a second ```.PAF``` file to ```-s```
--  sequences of the aligned assemblies are automatically ordered using the alignments to the reference genome, the sequence order of the reference genome can be specified using ```-p```
+-  sequences of the aligned assemblies are automatically ordered using the alignments to the reference genome, the sequence order of the reference genome can be set using ```-p```, which will be shown as a third panel below
 - by default, all sequences contained in the PAF files are shown, which means that if there are sequences without any alignments they might be missing
-- therefore, FAIDX files may be soecified for the ref/primary/secondary assemblies using ```-a```/```-b```/```-c``` to provide all sequences (unaligned sequences will still be shown, but won't be connected through alignments
-- gaps may be optionally plotted for the ref/primary/secondary assemblies if gap locations are provided (```-x```/```-y```/```-z```); they can be easily generated using [seqtk](https://github.com/lh3/seqtk) ```seqtk gap <FASTA>```
+- therefore, ```.FAIDX``` files may be soecified for the ref/primary/secondary assemblies using ```-a```/```-b```/```-c``` to provide all sequences (this adds unaligned sequences to the plot)
+- gaps may be optionally plotted for the ref/primary/secondary assemblies if gap locations are provided (```-x```/```-y```/```-z```); they can be easily generated with [seqtk](https://github.com/lh3/seqtk) (```seqtk gap <FASTA>```)
 - custom labels for the assemblies may be added with ```-n```
-- collinear alignments are shown in grey (alternating light/dark, according to reference chromosomes), inversions in blue, gapy in red (colors can be changed in the CONFIG block)
+- collinear alignments are shown in grey (alternating light/dark, according to reference chromosomes), inversions in blue, gaps in red (colors can be changed in the CONFIG block)
 - by default, only aligments of MQ>=60 are visualized (this may be adjusted in the CONFIG block by changing ```MIN_ALN_SCORE```)
-- supported output formats ```-f``` are ```HTML``` (interactive), ```PDF```, ```SVG``` and ```PNG```
+- supported output formats (```-f```) are ```HTML``` (interactive), ```PDF```, ```SVG``` and ```PNG``` (more than one can be specified as a comma-separated list)
 - in HTML output, individual chromosomes (and gaps if plotted) can be toggled on and off, and one can zoom in and out and hover displays provide additional information
-- 
-
-
-
+- more details are in the help message ```plot_paf_wga.py --help```
 
 
 ## ```separate_colors.py```
