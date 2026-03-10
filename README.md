@@ -33,11 +33,27 @@ Script to extract allelic depth from VCF at mitochondrial variant sites to check
 
 ## ```plot_bam_wga.py```
 
-Plot whole genome alignment from a BAM file.
+Plot whole genome alignment from BAM.
+- if you can, I'd recommend to use ```plot_paf_wga.py``` instead
 - visualize pairwise alignments of multiple chromosomes or contigs from a BAM file
 - collinear alignments in black, inversions highlighted in red, unaligned regions in grey.
 - usage: ```python plot_bam_alignments.py <input_path> <output_path> <faidx_path> <assoc_file_path> <regions_file_path>```
 - for details check ```plot_bam_alignments.py --help```
+
+
+## ```plot_paf_wga.py```
+
+Plot whole genome alignment(s) from PAF.
+-  successor for ```plot_bam_wga.py```
+-  pairwise genome alignments in ```.PAF``` format may be created with [minimap](https://github.com/lh3/minimap2) or the even faster [FastGA](https://github.com/thegenemyers/FASTGA)
+-  visualizes all reference genome sequences (chromosomes + contigs) and likewise the aligned assembly's sequences on top and connects pairwise alignment blocks
+-  optionally, a second aligned assembly can be visualized by specifying a second ```.PAF``` file to ```-s```
+-  sequences of the aligned assemblies are automatically ordered using the alignments to the reference genome, the sequence order of the reference genome can be specified using ```-p```
+- by default, all sequences contained in the PAF files are shown, which means that if there are sequences without any alignments they might be missing
+- therefore, FAIDX files may be soecified for the ref/primary/secondary assemblies using ```-a```/```-b```/```-c``` to provide all sequences (unaligned sequences will still be shown, but won't be connected through alignments
+- gaps may be optionally plotted for the ref/primary/secondary assemblies if gap locations are provided (```-x```/```-y```/```-z```); they can be easily generated using [seqtk](https://github.com/lh3/seqtk) ```seqtk gap <FASTA>```
+- 
+
 
 
 ## ```separate_colors.py```
