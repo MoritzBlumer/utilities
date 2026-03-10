@@ -52,7 +52,14 @@ Plot whole genome alignment(s) from PAF.
 - by default, all sequences contained in the PAF files are shown, which means that if there are sequences without any alignments they might be missing
 - therefore, FAIDX files may be soecified for the ref/primary/secondary assemblies using ```-a```/```-b```/```-c``` to provide all sequences (unaligned sequences will still be shown, but won't be connected through alignments
 - gaps may be optionally plotted for the ref/primary/secondary assemblies if gap locations are provided (```-x```/```-y```/```-z```); they can be easily generated using [seqtk](https://github.com/lh3/seqtk) ```seqtk gap <FASTA>```
+- custom labels for the assemblies may be added with ```-n```
+- collinear alignments are shown in grey (alternating light/dark, according to reference chromosomes), inversions in blue, gapy in red (colors can be changed in the CONFIG block)
+- by default, only aligments of MQ>=60 are visualized (this may be adjusted in the CONFIG block by changing ```MIN_ALN_SCORE```)
+- supported output formats ```-f``` are ```HTML``` (interactive), ```PDF```, ```SVG``` and ```PNG```
+- in HTML output, individual chromosomes (and gaps if plotted) can be toggled on and off, and one can zoom in and out and hover displays provide additional information
 - 
+
+
 
 
 
