@@ -165,7 +165,6 @@ def cli():
              ' reference_name,primary_name[,secondary_name',
     )
 
-    
     # parse
     args = parser.parse_args()
 
@@ -177,19 +176,6 @@ def cli():
         args.s_paf_path, args.r_fai_path, args.p_fai_path, args.s_fai_path, \
         args.r_gaps_path, args.p_gaps_path, args.s_gaps_path, \
         args.assembly_names
-
-# # def read_paf(input_paf_path):
-# p_paf_path = '/Users/moritzblumer/Downloads/fLabFul222.P_vs_fAstCal68.P.paf.gz'
-# s_paf_path = '/Users/moritzblumer/Downloads/fLabFul222.S_vs_fAstCal68.P.paf.gz'
-# seq_prefixes = 'chr,scf,SCAFFOLD_,atg_chr'
-# r_fai_path = '/Users/moritzblumer/Downloads/fAstCal68.P.fa.gz.fai'
-# p_fai_path = '/Users/moritzblumer/Downloads/fLabFul222.P.fa.gz.fai'
-# s_fai_path = '/Users/moritzblumer/Downloads/fLabFul222.S.fa.gz.fai'
-# r_gaps_path = '/Users/moritzblumer/Downloads/fAstCal68.P.fa.gz.gaps.tsv'
-# p_gaps_path = '/Users/moritzblumer/Downloads/fLabFul222.P.fa.gz.gaps.tsv'
-# s_gaps_path = '/Users/moritzblumer/Downloads/fLabFul222.S.fa.gz.gaps.tsv'
-
-
 
 
 
@@ -248,7 +234,7 @@ def get_len_dct(input_df, r_q):
         [f'{r_q}_name', f'{r_q}_len']
     ].drop_duplicates().set_index(f'{r_q}_name')
     len_dct = len_df.to_dict(orient='index')
-    
+
     return len_dct
 
 
@@ -256,11 +242,11 @@ def get_genome_size(seq_dct, q_r):
     '''
     Get the total size of a genome from a seq_dct.
     '''
-    
+
     genome_size = 0
     for seq_name in seq_dct.keys():
         genome_size += seq_dct[seq_name][f'{q_r}_len']
-    
+
     return genome_size
 
 
@@ -290,7 +276,7 @@ def v_sort(lst, prefix):
 
     out_lst = [
         f'{prefix}{x}' for x in sorted(sort_lst, key=natural_key)
-        
+
         ]
 
     return out_lst
@@ -321,7 +307,7 @@ def fetch_q_rank_offset(aln_df, q_dct, r_name_order_lst):
                 # get all pairwise alignments
                 r_q_df = aln_df.loc[(aln_df['r_name'] == r_name) \
                         & (aln_df['q_name'] == q_name)]
-                
+
                 # get total lengths across all alignments for current ref
                 aln_len_sum = sum(r_q_df['aln_len'])
 
@@ -360,12 +346,12 @@ def fetch_q_rank_offset(aln_df, q_dct, r_name_order_lst):
         q_dct[q_name]['rank'] = row['rank']
         q_dct[q_name]['offset'] = q_offset
         q_offset += row['q_len']
-    
+
     return q_dct
 
 
 def get_aln(aln_dct, aln_df, aln_type):
-    
+
     '''
     Fetch alignment list and largest total alignment length per query.
     '''
@@ -379,14 +365,14 @@ def get_aln(aln_dct, aln_df, aln_type):
         # get reference with longest alignment per query sequence
         best_r = \
             q_name_df.groupby('r_name')['aln_len'].sum().sort_values().index[-1]
-        
+
         # subset to that query sequence
         q_r_df = q_name_df.loc[q_name_df['r_name'] == best_r].copy()
 
         # compute midpoint per alignment
         q_r_df['r_mid'] = \
             q_r_df['r_start'] + (q_r_df['r_end']- q_r_df['r_start'])/2
-        
+
         # convert alignments to list
         aln_lst = []
         for _, row in q_r_df.iterrows():
@@ -417,10 +403,10 @@ def check_noaln_ref(r_name_lst, aln_dct, aln_type):
     r_name for r_name in r_name_lst if aln_dct[r_name][aln_type] == {}
         ]
     _type = 'primary' if aln_type == 'p_aln' else 'secondary'
-    if len(r_name_no_aln_lst) > 0:                                       
+    if len(r_name_no_aln_lst) > 0:
         print(
             f'[INFO] No major alignments found for reference sequences '
-            f'{", ".join(r_name_no_aln_lst)} in {_type} alignments', 
+            f'{", ".join(r_name_no_aln_lst)} in {_type} alignments',
             flush=True,
             file=sys.stderr,
         )
@@ -448,7 +434,7 @@ def read_gaps(gaps_path, seq_dct):
             size = abs(end - start)
             gaps_lst.append([start, end, size])
         seq_dct[seq_name]['gaps'] = gaps_lst
-    
+
     return seq_dct
 
 
@@ -511,7 +497,7 @@ def plot_alignments(
 
             # plot traces
             for aln in aln_dct[r_name][aln_type][q_name]['aln_lst']:
-                
+
                 # get coordinates
                 q_strand = aln[0]
                 q_start = aln[1] + q_offset + q_dct[q_name]['offset']
@@ -528,8 +514,9 @@ def plot_alignments(
                     q_start, q_end = q_end, q_start
 
                 # set display text
-                text = f'{r_name}:{aln[3]}-{aln[4]} | {q_name}:{aln[1]}-{aln[2]}'
-                
+                text = f'{r_name}:{aln[3]}-{aln[4]}' \
+                       f' | {q_name}:{aln[1]}-{aln[2]}'
+
                 # plot
                 fig.add_trace(
                     go.Scatter(
@@ -543,7 +530,7 @@ def plot_alignments(
                             r_start,
                             r_start,
                             q_start,
-                        ], 
+                        ],
                         y=[
                             Q_Y_LOWER,
                             Q_Y_UPPER,
@@ -563,7 +550,7 @@ def plot_alignments(
                         name=text,
                         legendgroup=f'{r_name}',
                         showlegend=False,
-                        line=dict(width=0, color=aln_color),
+                        line={'width': 0, 'color': aln_color},
                     )
                 )
 
@@ -632,7 +619,7 @@ def plot_alignments(
                     r_end,
                     r_end,
                     r_start,
-                ], 
+                ],
                 y=[
                     R_Y_LOWER,
                     R_Y_UPPER,
@@ -647,7 +634,7 @@ def plot_alignments(
                 name=f'{r_name}',
                 legendgroup=f'{r_name}',
                 showlegend=True,
-                line=dict(width=1, color=SEQ_BORDER_COLOR),
+                line={'width': 1, 'color': SEQ_BORDER_COLOR},
             )
         )
 
@@ -662,12 +649,12 @@ def plot_alignments(
             Q_Y_UPPER,
             Q_Y_LOWER
         ):
-        
+
         '''
         Plot bounding boxes for query sequences
         '''
         for q_name in q_dct.keys():
-            
+
             # set even/uneven chrom color
             r_name_order_ext_lst = r_name_order_lst + ['NA']
             r_index = r_name_order_ext_lst.index(q_dct[q_name]['best_r'])
@@ -687,7 +674,7 @@ def plot_alignments(
                         q_end,
                         q_end,
                         q_start,
-                    ], 
+                    ],
                     y=[
                         Q_Y_LOWER,
                         Q_Y_UPPER,
@@ -702,13 +689,26 @@ def plot_alignments(
                     name=f'{q_name}',
                     legendgroup=f'{q_dct[q_name]["best_r"]}',
                     showlegend=False,
-                    line=dict(width=1, color=SEQ_BORDER_COLOR),
+                    line={'width': 1, 'color': SEQ_BORDER_COLOR},
                 )
             )
 
-    plot_q_boxes(fig, p_dct, p_offset, r_name_order_lst, P_Y_UPPER, P_Y_LOWER)
+    plot_q_boxes(
+        fig,
+        p_dct,
+        p_offset,
+        r_name_order_lst,
+        P_Y_UPPER,
+        P_Y_LOWER,
+    )
     if s:
-        plot_q_boxes(fig, s_dct, s_offset, r_name_order_lst, S_Y_UPPER, S_Y_LOWER) 
+        plot_q_boxes(
+            fig, s_dct,
+            s_offset,
+            r_name_order_lst,
+            S_Y_UPPER,
+            S_Y_LOWER,
+        )
 
 
     ## GAPS
@@ -717,24 +717,37 @@ def plot_alignments(
     if any([r_gaps_path, p_gaps_path, s_gaps_path]):
         fig.add_trace(
             go.Scatter(
-                x=[0, 0, 0, 0], 
-                y=[0, 0, 0, 0], 
+                x=[0, 0, 0, 0],
+                y=[0, 0, 0, 0],
                 fill='toself',
                 fillcolor=GAP_COLOR,
                 mode='lines',
-                name=f'gaps',
-                legendgroup=f'gaps',
-                line=dict(width=0),
+                name='gaps',
+                legendgroup='gaps',
+                line={'width': 0},
                 showlegend=True,
             )
         )
 
-    def plot_gaps(fig, seq_dct, offset, max_width, Y_UPPER, Y_LOWER, MIN_GAP_WIDTH_PCT, GAP_COLOR):
+    def plot_gaps(
+            fig,
+            seq_dct,
+            offset,
+            max_width,
+            Y_UPPER,
+            Y_LOWER,
+            MIN_GAP_WIDTH_PCT,
+            GAP_COLOR,
+        ):
+
+        '''
+        Plot assembly gaps.
+        '''
 
         min_width = max_width * MIN_GAP_WIDTH_PCT * 0.01
 
         for seq_name in seq_dct.keys():
-            
+
             if 'gaps' in seq_dct[seq_name].keys():
 
                 for gap in seq_dct[seq_name]['gaps']:
@@ -749,7 +762,7 @@ def plot_alignments(
                         g_midpoint = g_start + (g_end - g_start)/2
                         g_start = g_midpoint - min_width/2
                         g_end = g_midpoint + min_width/2
-                    
+
                     # plot
                     fig.add_trace(
                         go.Scatter(
@@ -759,7 +772,7 @@ def plot_alignments(
                                 g_end,
                                 g_end,
                                 g_start,
-                            ], 
+                            ],
                             y=[
                                 Y_LOWER,
                                 Y_UPPER,
@@ -772,9 +785,9 @@ def plot_alignments(
                             opacity=1,
                             mode='lines',
                             name=f'{seq_name}:{gap[0]}-{gap[1]}',
-                            legendgroup=f'gaps',
+                            legendgroup='gaps',
                             showlegend=False,
-                            line=dict(width=1, color=GAP_COLOR),
+                            line={'width': 1, 'color': GAP_COLOR},
                         )
                     )
 
@@ -878,14 +891,14 @@ def plot_alignments(
     fig_width = 1800
     fig_height = 500 if not s else 800
 
-    # transparent background, hide axis labels, format legend text size and spacing
+    # transparent background, hide axis labels, legend text size and spacing
     fig.update_layout(
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         xaxis={'visible': False},
         yaxis={'visible': False},
         legend={'font': {'size': 15}, 'tracegroupgap': 0},
-        width=fig_width, 
+        width=fig_width,
         height=fig_height,
         font_family='Arial',
     )
@@ -894,6 +907,10 @@ def plot_alignments(
 
 
 def main():
+
+    '''
+    Main.
+    '''
 
     # parse command line arguments
     cli()
@@ -910,7 +927,7 @@ def main():
     # extract reference names & sizes from P PAF
     r_dct = get_len_dct(p_paf_df, 'r')
 
-    # [optional] extract reference names & sizes from S PAF and add anything 
+    # [optional] extract reference names & sizes from S PAF and add anything
     # missing to r_dct
     if s:
         if s: s_r_dct = get_len_dct(s_paf_df, 'r')
@@ -965,9 +982,9 @@ def main():
             if key in p_dct.keys():
                 if p_dct[key] != p_fai_dct[key]:
                     print(
-                        f'[ERROR] query sizes for {key} do not match between the'
-                        f' specified PAF file ({p_paf_path}) and the chromosome'
-                        f' file ({p_fai_path}).',
+                        f'[ERROR] query sizes for {key} do not match between'
+                        f' the specified PAF file ({p_paf_path}) and the'
+                        f' chromosome file ({p_fai_path}).',
                         file=sys.stderr,
                         flush=True,
                     )
@@ -1027,7 +1044,7 @@ def main():
             missing_seq_lst.append(i)
     if len(missing_seq_lst) > 0:
         print(
-            f'[ERROR] Sequence(s) {", ".join(missing_seq_lst)} not captured by the'
+            f'[ERROR] Sequence(s) {", ".join(missing_seq_lst)} not captured by'
             f' the specified prefixes {seq_prefixes}',
             flush=True,
             file=sys.stderr,
@@ -1035,7 +1052,7 @@ def main():
         sys.exit()
     if len(r_name_lst) != len(r_name_order_lst):
         print(
-            f'ERROR Sth. is wrong with the v_sort() logic --> tell the author',
+            '[ERROR] sth. is wrong with the v_sort() logic -> tell the author',
             flush=True,
             file=sys.stderr,
         )
@@ -1046,7 +1063,7 @@ def main():
     if s:
         s_aln_df = s_paf_df.loc[s_paf_df['aln_qual'] >= MIN_ALN_SCORE]
 
-    # infer query sequence plotting order based on the order of reference 
+    # infer query sequence plotting order based on the order of reference
     # sequences and the order of individual queries aligning to the same
     # reference sequence.
     p_dct = fetch_q_rank_offset(p_aln_df, p_dct, r_name_order_lst)
@@ -1070,8 +1087,16 @@ def main():
     # check if there are major alignments to all reference sequences, otherwise
     # print INFO message
     r_name_no_aln_dct = {}
-    r_name_no_aln_dct['p_aln'] = check_noaln_ref(r_name_lst, aln_dct, 'p_aln')
-    if s: r_name_no_aln_dct['s_aln'] = check_noaln_ref(r_name_lst, aln_dct, 's_aln')
+    r_name_no_aln_dct['p_aln'] = check_noaln_ref(
+        r_name_lst,
+        aln_dct,
+        'p_aln'
+    )
+    if s: r_name_no_aln_dct['s_aln'] = check_noaln_ref(
+        r_name_lst,
+        aln_dct,
+        's_aln',
+        )
 
     # determine plotting offsets
     p_offset = (r_size-p_size)/2
