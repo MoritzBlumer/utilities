@@ -61,6 +61,16 @@ Plot whole genome alignment(s) from PAF.
 - more details are in the help message ```plot_paf_wga.py --help```
 
 
+## ```plot_gwas.py```
+- create interactive or static plots of GWAS results
+- expects [GEMMA](https://github.com/genetics-statistics/GEMMA)-formatted ('assoc.txt' file) as main input
+- uses FAIDX index (or any other TSV with chrosome name and size as the first two columns) to infer chromosome boundaries
+- ```-p``` to specify which p value to use (default: p_wald)
+- ```-a``` to set alpha to infer and draw significance threshold (default: 0.01)
+- ```-x``` and ```-y``` to set figure width (default: 1500 p) and height (default: 500 p)
+- ```-f``` to select one or a comma-separated list of output formats (default: HTML)
+
+
 ## ```separate_colors.py```
 
 Plot different color ranges (red, yellow, blue) and shadows as separate panels below the original image.
