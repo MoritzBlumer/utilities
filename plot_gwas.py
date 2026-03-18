@@ -81,8 +81,8 @@ def cli():
         dest='alpha',
         required=False,
         metavar='\b',
-        default='0.05',
-        help='Global significance level for Bonferroni correction [default: 0.05]',
+        default='0.01',
+        help='Global significance level for Bonferroni correction [default: 0.01]',
     )
     parser.add_argument(
         '-y', '--fig_height',
