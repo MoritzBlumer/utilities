@@ -516,7 +516,7 @@ class PCA:
         (optionally gzipped) VCF file.
         '''
 
-        # open iput file
+        # open input file
         read_func = gzip.open if self.variant_file_path.endswith('.gz') else open
         with read_func(self.variant_file_path, 'rt') as variant_file:
 
