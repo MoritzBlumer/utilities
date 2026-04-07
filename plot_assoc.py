@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 #
-# Moritz Blumer | 2026-03-12
+# Moritz Blumer | 2026-04-06
 #
-# Visualize GEMMA formatted GWAS output
+# Visualize genome-wide association data
 
 
 
@@ -37,17 +37,17 @@ def cli():
     Parse command line arguments.
     '''
 
-    global gwas_path, faidx_path, output_prefix, p_val_column, plot_fmt, \
-        alpha, fig_height, fig_width
+    global assoc_path, faidx_path, output_prefix, chrom_column, var_column, \
+        p_val_column, plot_fmt, log, alpha, remove, fig_height, fig_width
 
     parser = argparse.ArgumentParser(description="Visualize pairwise genome \
         alignment(s) from PAF.")
 
     # add arguments
     parser.add_argument(
-        'gwas_path',
+        'assoc_path',
         type=str,
-        help='GEMMA-formatted input file.',
+        help='Input file with associations.',
     )
     parser.add_argument(
         'faidx_path',
@@ -60,12 +60,28 @@ def cli():
         help='Output prefix',
     )
     parser.add_argument(
+        '-c', '--chrom_column',
+        dest='chrom_column',
+        required=False,
+        metavar='\b',
+        default='chrom',
+        help='Column name that contains the chromosome [default: chrom]',
+    )
+    parser.add_argument(
+        '-v', '--var_column',
+        dest='var_column',
+        required=False,
+        metavar='\b',
+        default='pos',
+        help='Variant position [default: pos]',
+    )
+    parser.add_argument(
         '-p', '--p_val_column',
         dest='p_val_column',
         required=False,
         metavar='\b',
-        default='p_wald',
-        help='P value column to use from GEMMA output [default: p_wald]',
+        default='p',
+        help='P value column to use from GEMMA output [default: p]',
     )
     parser.add_argument(
         '-f', '--format',
@@ -77,12 +93,30 @@ def cli():
              ' may also be a comma-separated list [default: "HTML"]',
     )
     parser.add_argument(
+        '-l', '--log',
+        dest='log',
+        required=False,
+        metavar='\b',
+        default=True,
+        help='Set to False to plot raw values from p_val_column [default: True]',
+    )
+    parser.add_argument(
         '-a', '--alpha',
         dest='alpha',
         required=False,
         metavar='\b',
         default='0.01',
         help='Global significance level for Bonferroni correction [default: 0.01]',
+    )
+    parser.add_argument(
+        '-r', '--remove',
+        dest='remove',
+        required=False,
+        metavar='\b',
+        default=None,
+        help='Remove n-th lowest quantile of associations to reduce plot size/'
+             'complexity (applied after log unless disapled with --log False) '
+             '[default: None]',
     )
     parser.add_argument(
         '-y', '--fig_height',
@@ -105,11 +139,16 @@ def cli():
     args = parser.parse_args()
 
     # reassign variable names
-    gwas_path, faidx_path, output_prefix, p_val_column, plot_fmt, alpha, \
-        fig_height, fig_width = \
-        args.gwas_path, args.faidx_path, args.output_prefix, \
-            args.p_val_column, args.plot_fmt, \
-            float(args.alpha), int(args.fig_height), int(args.fig_width)
+    assoc_path, faidx_path, output_prefix, chrom_column, var_column, \
+        p_val_column, plot_fmt, log, alpha, remove, fig_height, fig_width = \
+        args.assoc_path, args.faidx_path, args.output_prefix, \
+            args.chrom_column, args.var_column, args.p_val_column, \
+            args.plot_fmt, args.log, float(args.alpha), float(args.remove), \
+            int(args.fig_height), int(args.fig_width)
+    
+    # evaluate log flag
+    if log in ['FALSE', 'False']:
+        log = False 
 
 
 
@@ -134,23 +173,16 @@ def main():
     ).to_dict(orient='index')
 
     # read GWAS
-    gwas_df = pd.read_csv(
-        gwas_path,
+    assoc_df = pd.read_csv(
+        assoc_path,
         sep='\t',
-        usecols=[0,2,12,13,14],
     )
 
     # subset for selected p_val_column
-    gwas_df = gwas_df[['chr', 'ps', p_val_column]]
-
-    # rename columns
-    gwas_df.columns = ['chrom', 'pos', p_val_column]
-
-    # add chr prefix back in
-    gwas_df['chrom'] = 'chr' + gwas_df['chrom'].astype(str)
+    assoc_df = assoc_df[[chrom_column, var_column, p_val_column]]
 
     # calculate offsets
-    chrom_lst = list(set(gwas_df['chrom']))
+    chrom_lst = list(set(assoc_df[chrom_column]))
     offset = 0
     for chrom in chrom_sizes_dct.keys():
         if chrom in chrom_lst:
@@ -160,15 +192,29 @@ def main():
             offset += chrom_sizes_dct[chrom]['size']
             chrom_sizes_dct[chrom]['offset_end'] = offset
 
-    # add genome pos to gwas_df
-    gwas_df['offset'] = [
-        chrom_sizes_dct[chrom]['offset'] for chrom in gwas_df['chrom']
+    # add genome pos to assoc_df
+    assoc_df['offset'] = [
+        chrom_sizes_dct[chrom]['offset'] for chrom in assoc_df[chrom_column]
     ]
-    gwas_df['genome_pos'] = gwas_df['offset'] + gwas_df['pos']
-    gwas_df = gwas_df[['chrom', 'pos', 'genome_pos', p_val_column]]
+    assoc_df['genome_pos'] = assoc_df['offset'] + assoc_df[var_column]
+    assoc_df = assoc_df[
+        [chrom_column, var_column, 'genome_pos', p_val_column]
+    ]
 
-    # calculate -log10(p_val_column)
-    gwas_df['-log10_p'] = -np.log10(gwas_df[p_val_column])
+    # calculate -log10(p_val_column) & significance threshold
+    if log:
+        assoc_df['-log10_{p_val_column}'] = -np.log10(assoc_df[p_val_column])
+        plot_col = '-log10_{p_val_column}'
+        significance_threshold = -np.log10(alpha / len(assoc_df))
+    else:
+        plot_col = p_val_column
+
+    # remove low associations to reduce plot size/complexity
+    if remove is not None:
+        r_threshold = assoc_df[plot_col].quantile(remove)
+        assoc_df = assoc_df.loc[assoc_df[plot_col] >= r_threshold]
+    else:
+        r_threshold = None
 
     # plot
     fig = go.Figure()
@@ -177,18 +223,15 @@ def main():
     chrom_label_lst = []
 
     # sort data by chromosome
-    gwas_df['chrom'] = pd.Categorical(gwas_df['chrom'],
+    assoc_df[chrom_column] = pd.Categorical(assoc_df[chrom_column],
         categories=chrom_sizes_dct.keys(),
         ordered=True,
     )
-    gwas_df = gwas_df.sort_values(['chrom'])
-
-    # calculate significance threshold
-    significance_threshold = -np.log10(alpha / len(gwas_df))
+    assoc_df = assoc_df.sort_values([chrom_column])
 
     # plot chromosome-wise
     for i, (chrom, chrom_df) in enumerate(
-        gwas_df.groupby('chrom', observed=True)
+        assoc_df.groupby(chrom_column, observed=True)
         ):
 
         # add name
@@ -201,28 +244,50 @@ def main():
         fig.add_trace(
             go.Scattergl(
                 x=chrom_df['genome_pos'],
-                y=chrom_df['-log10_p'],
+                y=chrom_df[plot_col],
                 mode='markers',
                 marker={
                     'size': 5,
                     'color': color,
                 },
-                customdata=chrom_df['chrom'].astype(str) + ":" + chrom_df['pos'].astype(str),
-                hovertemplate="<b>%{customdata}</b><br>-log10(p): %{y:.2f}<extra></extra>"        )
+                customdata=chrom_df[chrom_column].astype(str) + ":" + chrom_df[var_column].astype(str),
+                hovertemplate="<b>%{customdata}</b><br>{plot_col}: %{y:.2f}<extra></extra>"        )
         )
 
     # plot threshold
-    fig.add_hline(
-        y=significance_threshold,
-        line_dash='dot',
-        line_color='grey',
-        line_width=1,
-    )
+    if log:
+        fig.add_hline(
+            y=significance_threshold,
+            line_dash='dot',
+            line_color='grey',
+            line_width=1,
+        )
+
+    # plot removal threshold
+    if log:
+        fig.add_hline(
+            y=r_threshold,
+            line_dash='solid',
+            line_color='grey',
+            line_width=0.1,
+        )
+    fig.add_annotation(
+            x=0,
+            y=r_threshold,
+            text=f"associations <{r_threshold} {plot_col} not shown",
+            showarrow=False,
+            xanchor='left',
+            yanchor='top',
+            yshift=-2,                    # Fine-tune: shift 2 pixels down to clear the line
+            font=dict(size=5, color='grey'),
+            xref='x',
+            yref='y',
+        )
 
     # formatting
     fig.update_layout(
         xaxis={
-            'range': [0, chrom_sizes_dct[list(gwas_df['chrom'])[-2]]['offset_end']],
+            'range': [0, chrom_sizes_dct[list(assoc_df[chrom_column])[-2]]['offset_end']],
             'showgrid': False,
             'zeroline': False,
             'showline': True,
@@ -247,7 +312,7 @@ def main():
             width=fig_width,
             title=None,
             xaxis_title='Genomic position',
-            yaxis_title='-log10(p-value)',
+            yaxis_title=plot_col,
             template='plotly_white',
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
