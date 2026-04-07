@@ -31,6 +31,19 @@ Script to extract allelic depth from VCF at mitochondrial variant sites to check
 - usage: ```python extract_allelic_depths.py <vcf_path> <primary_ids_path> <mito_name> <mito_len> <base_error_rate> <ad_output_path> <stats_output_path>```
 
 
+## ```plot_assoc.py```
+- create interactive or static plots of association data, (e.g. GWAS, r2)
+- uses FAIDX index (or any other TSV with chrosome name and size as the first two columns) to infer chromosome boundaries
+- ```-c``` to specify column contains chromosome name (default: chrom)
+- ```-v``` to specify column contains variant position on the chromosome (default: pos)
+- ```-p``` to specify column containing data to plot (default: p)
+- ```-l``` to control whether to compute and plot -log10 of the data
+- ```-a``` to control alpha value to infer and draw significance threshold (default: 0.01)
+- ```-r``` to remove n-th quantile of weakes associations from plot, mainly to reduce file size (removing 90% of data by specifying 0.9 will often produce a nearly identically looking plot with lots of overlapping low associations not shown)
+- ```-x``` and ```-y``` to set figure width (default: 1500 p) and height (default: 500 p)
+- ```-f``` to select one or a comma-separated list of output formats (default: HTML)
+
+
 ## ```plot_bam_wga.py```
 
 Plot whole genome alignment from BAM.
@@ -59,16 +72,6 @@ Plot whole genome alignment(s) from PAF.
 - supported output formats (```-f```) are ```HTML``` (interactive), ```PDF```, ```SVG``` and ```PNG``` (more than one can be specified as a comma-separated list)
 - in HTML output, individual chromosomes (and gaps if plotted) can be toggled on and off, and one can zoom in and out and hover displays provide additional information
 - more details are in the help message ```plot_paf_wga.py --help```
-
-
-## ```plot_gwas.py```
-- create interactive or static plots of GWAS results
-- expects [GEMMA](https://github.com/genetics-statistics/GEMMA)-formatted ('assoc.txt' file) as main input
-- uses FAIDX index (or any other TSV with chrosome name and size as the first two columns) to infer chromosome boundaries
-- ```-p``` to specify which p value to use (default: p_wald)
-- ```-a``` to set alpha to infer and draw significance threshold (default: 0.01)
-- ```-x``` and ```-y``` to set figure width (default: 1500 p) and height (default: 500 p)
-- ```-f``` to select one or a comma-separated list of output formats (default: HTML)
 
 
 ## ```separate_colors.py```
