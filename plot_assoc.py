@@ -1,9 +1,7 @@
 #!/usr/bin/env python
-#
-# Moritz Blumer | 2026-04-06
-#
-# Visualize genome-wide association data
-
+'''
+Visualize genome-wide association data
+'''
 
 
 ## FILE INFO
@@ -36,9 +34,6 @@ def cli():
     '''
     Parse command line arguments.
     '''
-
-    global assoc_path, faidx_path, output_prefix, chrom_column, var_column, \
-        p_val_column, plot_fmt, log, alpha, remove, fig_height, fig_width
 
     parser = argparse.ArgumentParser(description="Visualize pairwise genome \
         alignment(s) from PAF.")
@@ -98,7 +93,7 @@ def cli():
         required=False,
         metavar='\b',
         default=True,
-        help='Set to False to plot raw values from p_val_column [default: True]',
+        help='"False" to plot raw values from p_val_column [default: True]',
     )
     parser.add_argument(
         '-a', '--alpha',
@@ -106,7 +101,7 @@ def cli():
         required=False,
         metavar='\b',
         default='0.01',
-        help='Global significance level for Bonferroni correction [default: 0.01]',
+        help='Significance level for Bonferroni correction [default: 0.01]',
     )
     parser.add_argument(
         '-r', '--remove',
@@ -136,21 +131,29 @@ def cli():
     )
 
     # parse
-    args = parser.parse_args()
-
-    # reassign variable names
-    assoc_path, faidx_path, output_prefix, chrom_column, var_column, \
-        p_val_column, plot_fmt, log, alpha, remove, fig_height, fig_width = \
-        args.assoc_path, args.faidx_path, args.output_prefix, \
-            args.chrom_column, args.var_column, args.p_val_column, \
-            args.plot_fmt, args.log, float(args.alpha), float(args.remove), \
-            int(args.fig_height), int(args.fig_width)
-    
-    # evaluate log flag
-    if log in ['FALSE', 'False']:
-        log = False 
+    return parser.parse_args()
 
 
+def save_fig(fig, format_string, prefix):
+
+    '''
+    Save figure in specified formats.
+    '''
+
+    for fmt in format_string.split(','):
+        if fmt in ['html', 'HTML']:
+            fig.write_html(f'{prefix}.html')
+        else:
+            try:
+                print(f'{prefix}.{fmt.lower()}')
+                fig.write_image(f'{prefix}.{fmt.lower()}')
+            except Exception as e:
+                print(
+                    f'[INFO] {fmt.lower()} not supported – skipping',
+                    file=sys.stderr,
+                    flush=True,
+                )
+                continue
 
 ## MAIN
 
@@ -161,7 +164,21 @@ def main():
     '''
 
     # parse commend line arguments
-    cli()
+    args = cli()
+
+    # parse variable names
+    assoc_path = args.assoc_path
+    faidx_path = args.faidx_path
+    output_prefix =  args.output_prefix
+    chrom_column = args.chrom_column
+    var_column = args.var_column
+    p_val_column = args.p_val_column
+    plot_fmt = args.plot_fmt
+    log = args.log not in ['FALSE', 'False', False]
+    alpha = float(args.alpha)
+    remove = float(args.remove)
+    fig_height = int(args.fig_height)
+    fig_width = int(args.fig_width)
 
     # read FAIDX
     chrom_sizes_dct = pd.read_csv(
@@ -229,6 +246,27 @@ def main():
     )
     assoc_df = assoc_df.sort_values([chrom_column])
 
+    # plot removal threshold
+    if remove:
+        fig.add_hline(
+            y=r_threshold,
+            line_dash='solid',
+            line_color='grey',
+            line_width=0.1,
+        )
+        fig.add_annotation(
+                x=0,
+                y=r_threshold,
+                text=f"associations <{r_threshold} {plot_col} not shown",
+                showarrow=False,
+                xanchor='left',
+                yanchor='top',
+                yshift=-2,
+                font={'size': 5, 'color': 'grey'},
+                xref='x',
+                yref='y',
+            )
+
     # plot chromosome-wise
     for i, (chrom, chrom_df) in enumerate(
         assoc_df.groupby(chrom_column, observed=True)
@@ -250,11 +288,14 @@ def main():
                     'size': 5,
                     'color': color,
                 },
-                customdata=chrom_df[chrom_column].astype(str) + ":" + chrom_df[var_column].astype(str),
-                hovertemplate="<b>%{customdata}</b><br>{plot_col}: %{y:.2f}<extra></extra>"        )
+                customdata=chrom_df[chrom_column].astype(str) \
+                    + ":" + chrom_df[var_column].astype(str),
+                hovertemplate="<b>%{customdata}</b><br>" + plot_col \
+                    + ": %{y:.2f}<extra></extra>",
+            )
         )
 
-    # plot threshold
+    # plot significance threshold
     if log:
         fig.add_hline(
             y=significance_threshold,
@@ -263,31 +304,11 @@ def main():
             line_width=1,
         )
 
-    # plot removal threshold
-    if log:
-        fig.add_hline(
-            y=r_threshold,
-            line_dash='solid',
-            line_color='grey',
-            line_width=0.1,
-        )
-    fig.add_annotation(
-            x=0,
-            y=r_threshold,
-            text=f"associations <{r_threshold} {plot_col} not shown",
-            showarrow=False,
-            xanchor='left',
-            yanchor='top',
-            yshift=-2,                    # Fine-tune: shift 2 pixels down to clear the line
-            font=dict(size=5, color='grey'),
-            xref='x',
-            yref='y',
-        )
-
     # formatting
+    x_max = chrom_sizes_dct[list(assoc_df[chrom_column])[-2]]['offset_end']
     fig.update_layout(
         xaxis={
-            'range': [0, chrom_sizes_dct[list(assoc_df[chrom_column])[-2]]['offset_end']],
+            'range': [0, x_max],
             'showgrid': False,
             'zeroline': False,
             'showline': True,
@@ -325,20 +346,7 @@ def main():
         )
 
     # save figure
-    for fmt in plot_fmt.split(','):
-        if fmt in ['html', 'HTML']:
-            fig.write_html(f'{output_prefix}.html')
-        else:
-            try:
-                print(f'{output_prefix}.{fmt.lower()}')
-                fig.write_image(f'{output_prefix}.{fmt.lower()}')
-            except:
-                print(
-                    f'[INFO] {fmt.lower()} not supported – skipping',
-                    file=sys.stderr,
-                    flush=True,
-                )
-                sys.exit()
+    save_fig(fig, plot_fmt, output_prefix)
 
 
 
