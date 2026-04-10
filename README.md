@@ -13,7 +13,7 @@ Uses samtools mpileup and counts reads supporting A, T, C, G for a single indivi
   (1) The specified sample ID
   (2) The total number of sites exceeding ```--depth_threshold```(default: 8)
   (3) The number of sites wher more than ```--min_count```(default: 1) reads support more than ```--ploidy``` (default: 2) alleles
-- Use ```--write_per_site_tsv``` and specify a path to write the per site stats if required (output is tab-separated and gzip-compressed, see ```--help```for details)
+- Use ```--write_per_site_tsv``` and specify a path to write the per site stats if required (output is tab-separated and gzip-compressed, see ```--help``` for details)
 
 
 ## ```count_alleles.py```
