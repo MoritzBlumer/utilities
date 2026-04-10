@@ -3,6 +3,19 @@ Collection of (hopefully) useful things
 
 # descriptions
 
+## ```contamination_scan.py```
+
+Uses samtools mpileup and counts reads supporting A, T, C, G for a single individual. Then calculates the fraction of reads that support more alleles than what the ploidy setting allows.
+- requires samtools (version >= 1.10) in $PATH
+- input: (1) Path to a SAM/BAM/CRAM file, (2) Path to the corresponding reference genome FASTA (must have a .fai index), (3) a sample ID
+- ploidy (default: 2) and counting thresholds can be changed (see ```--help```)
+- output: prints a single line to STDOUT with 4 tab-separated fields:
+  (1) The specified sample ID
+  (2) The total number of sites exceeding ```--depth_threshold```(default: 8)
+  (3) The number of sites wher more than ```--min_count```(default: 1) reads support more than ```--ploidy``` (default: 2) alleles
+- Use ```--write_per_site_tsv``` and specify a path to write the per site stats if required (output is tab-separated and gzip-compressed, see ```--help```for details)
+
+
 ## ```count_alleles.py```
 
 Simple script to count missing (.), A, C, G, T alleles per site from a VCF.
