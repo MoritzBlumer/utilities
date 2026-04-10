@@ -5,7 +5,7 @@ Collection of (hopefully) useful things
 
 ## ```contamination_scan.py```
 
-Uses samtools mpileup and counts reads supporting A, T, C, G for a single individual. Then calculates the fraction of reads that support more alleles than what the ploidy setting allows.
+Uses samtools mpileup and counts reads supporting A, T, C, G for a single individual. Then calculates the fraction of reads that support more alleles than what the ploidy setting allows. Can be used for mitochondria with ```--ploidy``` set to ```1```, probably a better approach than the VCF-based ```mito_contamination_scan.py```.
 - requires samtools (version >= 1.10) in $PATH
 - input: (1) Path to a SAM/BAM/CRAM file, (2) Path to the corresponding reference genome FASTA (must have a .fai index), (3) a sample ID
 - ploidy (default: 2) and counting thresholds can be changed (see ```--help```)
