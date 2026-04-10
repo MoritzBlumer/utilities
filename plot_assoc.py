@@ -134,6 +134,9 @@ def cli():
     return parser.parse_args()
 
 
+
+## FUNCTIONS
+
 def save_fig(fig, format_string, prefix):
 
     '''
