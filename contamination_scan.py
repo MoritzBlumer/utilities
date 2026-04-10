@@ -321,7 +321,7 @@ def main():
 
     # print output to STDOUT
     print(
-        f'{SAMPLE_ID}\t{stats[0]}\t{stats[1]}\t{round(stats[1]/stats[0], 8)}',
+        f'{SAMPLE_ID}\t{stats[0]}\t{stats[1]}\t{stats[1]/stats[0]:.10f}',
         file=sys.stdout,
         flush=True
     )
