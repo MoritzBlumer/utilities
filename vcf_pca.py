@@ -315,7 +315,7 @@ class Log():
 
     def newline(self):
         '''
-        Print ERROR message to STDERR and exit.
+        Print new line.
         '''
 
         print('\n',
@@ -556,7 +556,8 @@ class PCA:
                     if pos > self.stop: break
                     gts = [line[9:][idx].split(':')[0] for idx in sample_idx_lst]
                     gts = [self.gt_code_dct[x] for x in gts]
-                    if self.skip_monomorphic and len(set(gts)) == 1:
+                    if self.skip_monomorphic and \
+                        len(set([x for x in gts if not np.isnan(x)])) == 1:
                         continue
                     self.variants.append([pos] + gts)
 
@@ -571,7 +572,8 @@ class PCA:
                     pos = int(line[1])
                     gts = [line[9:][idx].split(':')[0] for idx in sample_idx_lst]
                     gts = [self.gt_code_dct[x] for x in gts]
-                    if self.skip_monomorphic and len(set(gts)) == 1:
+                    if self.skip_monomorphic and \
+                        len(set([x for x in gts if not np.isnan(x)])) == 1:
                         continue
                     self.variants.append([pos] + gts)
                     
