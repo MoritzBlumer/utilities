@@ -14,6 +14,8 @@ import pandas as pd
 import gzip
 import allel
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
 
 ############################################
 #  set default values in self.default_dct  #
@@ -120,13 +122,12 @@ class CLI:
 
     def plot(self):
         '''
-        Plot PC1, PC2, heterozygosity and per window stats for a specified input
-        chromosome.
+        Plot two PCs as a classic 2D scatter plot.
         '''
 
         # add subparser
         plot_parser = self.subparsers.add_parser(
-            'plot', help='Plot PCA.'
+            'plot', help='Plot two PCs in 2D.'
         )
 
         # positional arguments
@@ -165,6 +166,51 @@ class CLI:
             '--r', '--reverse', dest='reverse', required=False, 
             action='store_true', help='Set flag to reverse the plotting'
             ' order of specified group (-g/--groups).')
+
+
+    def stackplot(self):
+        '''
+        Plot 10 PCs stacked on top of each other and connect individual
+        samples.
+        '''
+
+        # add subparser
+        stackplot_parser = self.subparsers.add_parser(
+            'stackplot', help='Plot first 10 PCA stacked'
+        )
+
+        # positional arguments
+        self.shared_arguments(stackplot_parser)
+
+        # optional arguments
+        stackplot_parser.add_argument(
+            '-m', '--metadata', dest='metadata_path', required=False,
+            metavar='\b', help='Path to metadata TSV where first column are'
+            ' sample IDs. Additional columns will be used to annotate data in'
+            ' HTML plot.')
+        stackplot_parser.add_argument(
+            '-g', '--groups', dest='color_by', required=False, metavar='\b',
+            help='Metadata column for color-grouping. Requires -m/--metadata.')
+        stackplot_parser.add_argument(
+            '-c', '--colors', dest='hex_codes', required=False, metavar='\b',
+            help='HEX codes (drop "#") for color groups. Check documentation'
+            ' for formatting instructions. Requires -g/--groups.')
+        stackplot_parser.add_argument(
+            '-f', '--format', dest='plot_fmt', required=False, metavar='\b',
+            default='HTML', help='Output plot file format ("HTML",'
+            ' "PDF", "SVG" or "PNG") [default: {HTML}].')
+        stackplot_parser.add_argument(
+            '--n', '--numeric', dest='numeric', required=False, 
+            action='store_true', help='Set flag to apply a continuous color'
+            ' scale (requires numerical data).')
+        stackplot_parser.add_argument(
+            '--r', '--reverse', dest='reverse', required=False, 
+            action='store_true', help='Set flag to reverse the plotting'
+            ' order of specified group (-g/--groups).')
+        stackplot_parser.add_argument(
+            '--s', '--scale', dest='scale', required=False, 
+            action='store_true', help='Normalize all PCs by their'
+            ' variance explained.')
 
 
     def parse_args(self):
@@ -294,6 +340,8 @@ class CLI:
             self.args_dct['n_pcs'] = args.n_pcs
         if hasattr(args, 'invert'):
             self.args_dct['invert'] = args.invert
+        if hasattr(args, 'scale'):
+            self.args_dct['scale'] = args.scale
         
         # add in settings from config
         self.args_dct['skip_monomorphic'] = self.default_dct['skip_monomorphic']
@@ -631,6 +679,7 @@ class Plot:
                  plot_h=None,
                  plot_fmt_lst=None,
                  invert=None,
+                 scale=False,
                  ):
 
         # input variables
@@ -645,6 +694,7 @@ class Plot:
         self.plot_w = plot_w
         self.plot_h = plot_h
         self.plot_fmt_lst = plot_fmt_lst
+        self.scale = scale
 
         # instance variables
         self.pc_df = pd.DataFrame()
@@ -808,7 +858,10 @@ class Plot:
         Save figure in HTML and/or other (PDF, SVG, PNG) format(s).
         '''
         for fmt in self.plot_fmt_lst:
-            title = f'{self.plot_pcs[0]}-{self.plot_pcs[1].replace("PC", "")}'
+            if self.plot_pcs:
+                title = f'{self.plot_pcs[0]}-{self.plot_pcs[1].replace("PC", "")}'
+            else:
+                title = 'stackplot'
             if fmt == 'html':
                 self.fig.write_html(f'{self.prefix}.{title}.{fmt}')
             else:
@@ -817,8 +870,7 @@ class Plot:
 
     def plot(self):
         '''
-        Plot per-sample values for one chromosome (e.g. PC 1) with small panel
-        of per window values (e.g. PC 1 variance explained) on top.
+        2D scatter plot of two PCs.
         '''
 
         # LOAD & PREPARE DATA
@@ -846,9 +898,6 @@ class Plot:
 
         # set per-sample plot colors
         self.set_colors()
-
-        # figure setup
-        self.fig = go.Figure()
     
         # compile hover data strings
         self.pc_df['hover_label'] = 'NA'
@@ -888,6 +937,12 @@ class Plot:
         # set show_legend to false if using a color scale
         show_legend = not self.numeric
 
+        # figure setup
+        self.fig = go.Figure()
+
+
+        ##  Panel I: PCs
+
         # plot each specified group (-g) separately (or 'id' if unspecified)
         for group in self.group_lst:
 
@@ -909,6 +964,10 @@ class Plot:
                     showlegend=show_legend,
                 ),
             )
+
+
+        ## FORMATTING
+
         # general layout
         self.fig.update_layout(
             template='simple_white',
@@ -1015,6 +1074,258 @@ class Plot:
         )
 
 
+    def stackplot(self):
+        '''
+        Stacked plot of 10 PCs plus variance explained.
+        '''
+
+        # LOAD & PREPARE DATA
+
+        # load data
+        self.pc_df = pd.read_csv(
+            f'{self.prefix}.pc.tsv.gz', sep='\t'
+        )
+        self.ve_df = pd.read_csv(
+            f'{self.prefix}.ve.tsv.gz', sep='\t'
+        )
+
+        # POSSIBLY ADD: flip individual PCs
+        # if self.invert:
+        #     if self.invert == 'x':
+        #          self.pc_df[self.plot_pcs[0]] =  self.pc_df[self.plot_pcs[0]]*-1
+
+        # scale if specified
+        if self.scale == True:
+            ve_values = self.ve_df.iloc[0, :].values
+            scaling_factors = ve_values / ve_values[0]
+            self.pc_df = self.pc_df.multiply(scaling_factors, axis=1)
+
+        # annotate per-sample data if metadata were supplied
+        self.annotate()
+
+        # set per-sample plot colors
+        self.set_colors()
+    
+        # compile hover data strings
+        self.pc_df['hover_label'] = 'NA'
+
+        # iterate through each individual
+        for sample in set(self.pc_df['id']):
+
+            # subset data
+            sample_df = self.pc_df[self.pc_df['id'] == sample]
+
+            # compile hover string
+            hover_str = \
+                ''.join(
+                    [
+                        f'<b>{c}</b>: {sample_df[c].iloc[0]}<br>' \
+                            for c in sample_df.columns
+                    ]
+                )
+
+            # add to pc_df
+            self.pc_df.loc[self.pc_df['id'] == sample, 'hover_label'] = hover_str
+
+        # set show_legend to false if using a color scale
+        show_legend = not self.numeric
+
+        # figure setup
+        self.fig = make_subplots(
+            rows=1,
+            cols=2,
+            shared_yaxes=True,
+            column_widths=[7, 1], 
+            horizontal_spacing=0.01,
+        )
+
+        # get y values corresponding with the PCs        
+        y = list(reversed(list(range(0, 10))))
+
+
+        ## PANEL I: PC values
+
+        # plot each specified group (-g) separately (or 'id' if unspecified)
+        for group in self.group_lst:
+
+            # get group color
+            group_color = self.color_dct[group]
+
+            # subset data to group
+            group_df = self.pc_df[self.pc_df[self.group_id] == group].copy()
+
+            # dummy trace for legend display
+            if show_legend:
+                self.fig.add_trace(
+                    go.Scattergl(
+                        x=[None],
+                        y=[None],
+                        name=group,
+                        legendgroup=group,
+                        mode='markers',
+                        marker=dict(color=group_color, size=7),
+                        showlegend=True,
+                    ),
+                    row=1, col=1,
+                )
+
+            # plot
+            for id, row in group_df.iterrows():
+
+                self.fig.add_trace(
+                    go.Scattergl(
+                        x=row[['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10']].to_list(),
+                        y=y,
+                        hovertext=row[['hover_label']],
+                        hoverinfo='text',
+                        hoverlabel=dict(font_size=8),
+                        name=group,
+                        legendgroup=group,
+                        mode='lines+markers',
+                        marker=dict(color=group_color),
+                        showlegend=False,
+                    ),
+                    row=1, col=1,
+                )
+
+
+        ## PANEL II: Variance explained
+
+        # fetch ve values
+        ve_values = self.ve_df.iloc[0, :].values 
+        self.fig.add_trace(
+            go.Bar(
+                x=ve_values,
+                y=y,
+                orientation='h',
+                width=0.4,
+                marker=dict(color='gray'),
+                showlegend=False,
+                hoverinfo='x'
+            ),
+            row=1, col=2
+        )
+
+
+        ## FORMATTING
+
+        for val in y:
+            self.fig.add_hline(
+                y=val,
+                line_color='grey',
+                line_dash='dot',
+                line_width=1.5,
+                layer='below',
+                row='all', col='all',
+            )
+
+
+        # general layout
+        self.fig.update_layout(
+            template='simple_white',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
+            font_family='Arial',
+            font_color='black',
+            width=self.plot_w,
+            height=self.plot_h,
+            legend=dict(font=dict(size=10)),
+            )
+
+        # format x axis
+        x_title = 'PC score' if not self.scale == True \
+            else 'PC score (scaled to variance explained)'
+        self.fig.update_xaxes(
+            linewidth=1,
+            side='bottom', 
+            mirror=True,
+            ticks='outside', tickfont=dict(size=10), tickformat=',.0f',
+            title_font=dict(size=12),
+            title=dict(
+                text=x_title, 
+                standoff=1,
+            ),
+            row=1, col=1,
+
+        )
+        self.fig.update_xaxes(
+            linewidth=1,
+            side='bottom', 
+            mirror=True,
+            ticks='outside', tickfont=dict(size=10), tickformat=',.0f',
+            title_font=dict(size=12),
+            title=dict(
+                text='% variance explained' , 
+                standoff=1,
+            ),
+            row=1, col=2,
+        )
+
+        # format y axis
+        self.fig.update_yaxes(
+            tickvals=y,
+            ticktext=self.pc_df.columns[1:11].to_list(),
+            linewidth=1,
+            side='left', 
+            mirror=True,
+            ticks='outside', tickfont=dict(size=10),
+            title_font=dict(size=12),
+            title=dict(
+                text='Principal Component' , 
+                standoff=1,
+            ),
+            row=1, col=1,
+        )
+        self.fig.update_yaxes(
+            tickvals=y,
+            ticktext=self.pc_df.columns[1:11].to_list(),
+            linewidth=1,
+            side='left', 
+            mirror=True,
+            ticks='',
+            title_font=dict(size=12),
+            row=1, col=2,
+        )
+
+        # plot colorscale instead of per-sample legend for numeric metadata
+        if self.numeric:
+            val_lst = [
+                float(x) for x in self.pc_df[self.color_by] \
+                    if not x in self.na_lst
+            ]
+            min_val = min(val_lst)
+            max_val = max(val_lst)
+            self.fig.update_layout(
+                coloraxis=dict(
+                    colorscale=self.color_scale,
+                    cmin=min_val,
+                    cmax=max_val,
+                    colorbar=dict(
+                        len=0.7,
+                        thickness=10,
+                        title=dict(
+                            text=self.color_by,
+                            font=dict(size=10),
+                            side='right'
+                        ),
+                        tickvals=[min_val, max_val],
+                        tickfont=dict(size=10),
+                    ),
+                ),
+            )
+            self.fig.add_trace(go.Scatter(
+                x=[None],
+                y=[None],
+                mode='markers',
+                marker=dict(
+                    color=[0],
+                    coloraxis='coloraxis'
+                ),
+                showlegend=False,
+            ),
+        )
+
+
 
 ## MAIN
 
@@ -1029,6 +1340,7 @@ def main():
     cli = CLI()
     cli.pca()
     cli.plot()
+    cli.stackplot()
     cli.parse_args()
     args_dct = cli.args_dct
 
@@ -1085,6 +1397,32 @@ def main():
         )
         plot.plot()
         plot.savefig()
+
+    # mode: stackplot
+
+    if mode == 'stackplot':
+
+        # print info
+        log.newline()
+        log.info('Creating stacked PCA plot')
+        log.newline()
+
+        # load module & instantiate
+        #from modules.plot import Plot
+        plot = Plot(prefix=args_dct['prefix'],
+                    metadata_path=args_dct['metadata_path'],
+                    color_by=args_dct['color_by'],
+                    hex_code_dct=args_dct['hex_code_dct'],
+                    plot_w=args_dct['plot_w'],
+                    plot_h=args_dct['plot_h'],
+                    plot_fmt_lst=args_dct['plot_fmt_lst'],
+                    numeric=args_dct['numeric'],
+                    reverse=args_dct['reverse'],
+                    scale=args_dct['scale']
+        )
+        plot.stackplot()
+        plot.savefig()
+
 
     # print exit message
     log.info('Done')
