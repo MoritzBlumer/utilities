@@ -943,6 +943,9 @@ class Plot:
 
         ##  Panel I: PCs
 
+        # fetch groups present in data
+        self.group_lst = list(set(self.pc_df[self.group_id]))
+
         # plot each specified group (-g) separately (or 'id' if unspecified)
         for group in self.group_lst:
 
@@ -1079,6 +1082,11 @@ class Plot:
         Stacked plot of 10 PCs plus variance explained.
         '''
 
+        # set plot pcs
+        plot_pcs = [
+            'PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10',
+        ]
+
         # LOAD & PREPARE DATA
 
         # load data
@@ -1145,6 +1153,9 @@ class Plot:
 
         ## PANEL I: PC values
 
+        # get groups
+
+
         # plot each specified group (-g) separately (or 'id' if unspecified)
         for group in self.group_lst:
 
@@ -1174,7 +1185,7 @@ class Plot:
 
                 self.fig.add_trace(
                     go.Scattergl(
-                        x=row[['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10']].to_list(),
+                        x=row[plot_pcs].to_list(),
                         y=y,
                         hovertext=row[['hover_label']],
                         hoverinfo='text',
