@@ -100,12 +100,12 @@ Plot different color ranges (red, yellow, blue) and shadows as separate panels b
 
 Submit jobs e.g. in a loop on a server without job scheduler
 - usage: ```screener <"command"> <job name>```
-- creates directory .screen with files .screen/screen.name.submit and .screen/screen.name.out
-- .screen/screen.name.submit contains submission time and command
-- .screen/screen.name.out contains all STDERR and STDOUT
+- creates directory .screen with files .screen/name.submit and .screen/name.out
+- .screen/name.submit contains submission time and command
+- .screen/name.out contains all STDERR and STDOUT
 - example: screener "echo test" test
 - make executable (chmod +x screener) and add do $PATH to call it from anywhere
-- ```re-screen <.screen/screen.*.submit>``` re-launches an existing submission file from a screener job
+- ```re-screen <.screen/*.submit>``` re-launches an existing submission file from a screener job
 
 
 ## ```simplify_bam.py```
@@ -124,12 +124,12 @@ Simplify CIGAR string and remove tags in SAM/BAM file to reduce size and IGV loa
 Wrapper to submit SLURM/SBATCH and organize the submission and output files
 - usage: ```slurmer <prompt> <jobname> <runtime> <memory> <num_cores_per_task> <num_tasks> <num_nodes> <partition>```
 - set defaults (such as run time, memory, partition, etc) and user email address in the SETUP section of the script before usage
-- creates directory .slurm with files .slurm/slurm.name.submit and .slurm/slurm.name.out
-- .slurm/slurm.name.submit contains submission time and command
-- .slurm/slurm.name.out contains all STDERR and STDOUT
+- creates directory .slurm with files .slurm/name.submit and .slurm/name.out
+- .slurm/name.submit contains submission time and command
+- .slurm/name.out contains all STDERR and STDOUT
 - example: slurm "echo test" test
 - make executable (chmod +x slurmer) and add do $PATH to call it from anywhere
-- ```re-slurm <.slurm/slurm.*.submit>``` re-launches an existing submission file from a slurmer job
+- ```re-slurm <.slurm/*.submit>``` re-launches an existing submission file from a slurmer job
 
 
 ## ```subset_beagle.py```
