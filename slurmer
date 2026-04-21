@@ -50,7 +50,7 @@ fi
 
 ## COMPILE SUBMISSION SCRIPT
 
-cat << EOF > .slurm/slurm.${name}.submit
+cat << EOF > .slurm/${name}.submit
 #!/bin/bash
 
 
@@ -65,7 +65,7 @@ cat << EOF > .slurm/slurm.${name}.submit
 #SBATCH -p ${partition}
 #SBATCH --mail-type=FAIL
 #SBATCH --no-requeue
-#SBATCH -o .slurm/slurm.${name}.out
+#SBATCH -o .slurm/${name}.out
 #SBATCH --mail-user=${email}
 #ADDITIONAL_PARAMETERS: $add_parameters
 
@@ -90,13 +90,13 @@ EOF
 ## SUBMIT
 
 # submit
-job_id=$(sbatch $add_parameters .slurm/slurm.${name}.submit | cut -d ' ' -f4)
-echo -e "\nJOBID $job_id" >> .slurm/slurm.${name}.submit
+job_id=$(sbatch $add_parameters .slurm/${name}.submit | cut -d ' ' -f4)
+echo -e "\nJOBID $job_id" >> .slurm/${name}.submit
 
 # print summarizing info:
 echo -e "\n======"
 echo -e "JOBID:\t\t$job_id"
-echo -e "JOB NAME:\tslurm.${name}.submit)"
+echo -e "JOB NAME:\t${name}.submit)"
 printf "\nParameters:\n"
 printf "    command:\t${prompt}\n"
 printf "    job name:\t${name}\n"
