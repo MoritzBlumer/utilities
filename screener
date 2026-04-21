@@ -20,7 +20,7 @@ fi
 mkdir -p .screen
 
 # compile output (STDOUT + STDERR) .screen file path
-out_prefix=.screen/screen.${name}
+out_prefix=.screen/${name}
 
 # set job file
 cat << EOF > ${out_prefix}.submit
