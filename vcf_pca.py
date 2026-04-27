@@ -944,7 +944,10 @@ class Plot:
         ##  Panel I: PCs
 
         # fetch groups present in data
-        self.group_lst = list(set(self.pc_df[self.group_id]))
+        self.group_lst = [
+            group for group in self.group_lst \
+                if group in set(self.pc_df[self.group_id])
+        ]
 
         # plot each specified group (-g) separately (or 'id' if unspecified)
         for group in self.group_lst:
@@ -1153,8 +1156,11 @@ class Plot:
 
         ## PANEL I: PC values
 
-        # get groups
-
+        # fetch groups present in data
+        self.group_lst = [
+            group for group in self.group_lst \
+                if group in set(self.pc_df[self.group_id])
+        ]
 
         # plot each specified group (-g) separately (or 'id' if unspecified)
         for group in self.group_lst:
