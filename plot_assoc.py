@@ -148,7 +148,6 @@ def save_fig(fig, format_string, prefix):
             fig.write_html(f'{prefix}.html')
         else:
             try:
-                print(f'{prefix}.{fmt.lower()}')
                 fig.write_image(f'{prefix}.{fmt.lower()}')
             except Exception as e:
                 print(
