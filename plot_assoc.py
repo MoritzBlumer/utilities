@@ -222,8 +222,8 @@ def main():
 
     # calculate -log10(p_val_column) & significance threshold
     if log:
-        assoc_df['-log10_{p_val_column}'] = -np.log10(assoc_df[p_val_column])
-        plot_col = '-log10_{p_val_column}'
+        assoc_df[f'-log10_{p_val_column}'] = -np.log10(assoc_df[p_val_column])
+        plot_col = f'-log10_{p_val_column}'
         significance_threshold = -np.log10(alpha / len(assoc_df))
     else:
         plot_col = p_val_column
