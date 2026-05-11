@@ -143,7 +143,7 @@ Subset a BEAGLE (or BEAGLE.gz)
 ## ```unscaffold.py```
 
 Splits sequences in a FASTA at stretches of Ns of specified size and outputs a new FASTA
-- Treats 'N' and 'n' the same
+- treats 'N' and 'n' the same
 - does not modify gaps of other than the specified size
 - optional size sort of output contigs
 - reads all sequences into memory (--> therefore requires ~ 2x the memory size of the uncompressed input FASTA)
@@ -153,7 +153,16 @@ Splits sequences in a FASTA at stretches of Ns of specified size and outputs a n
 
 ## ```vcf_gt_plotter.py```
 
-Plot all (incl. invariant) or just variable SNPs in a genomic window. Parses and filters variant data directly from an allsites VCF, and ignores indels or SNPs with overlapping indels. In ```snps``` visualization mode, only variable SNPs are displayed,in ```full``` visualization mode all positions are shown, and filtered sites are displayed as greyed out columns. Variable SNPs are polarized by major allele, and the major allele is by default not shown (i.e. plotted in white) for a cleaner image (this can be disabled by setting ```-m```). Different color modes are supported (see ```-c```), ```multi``` is the default and uses distinct colors for the 10 genotypes. The main goal are interactive plots, but smaller regions, especially in ```snps``` mode, can sometimes be used as PNGs (PDF rendering does not produce good results, SVG sometimes). When plotting larger regions, all variants might only be visible when zooming in more closely in the interactive HTML plots. Looks for ```bcftools``` in ```$PATH```, make sure a recent version is accessible. Also requires plotly, pandas and numpy.
+Plot all (incl. invariant) or just variable SNPs in a genomic window. 
+- parses and filters variant data directly from an allsites VCF, and ignores indels or SNPs with overlapping indels
+- in ```snps``` visualization mode, only variable SNPs are displayed,in ```full``` visualization mode all positions are shown, and filtered sites are displayed as greyed out columns
+- variable SNPs are polarized by major allele, and the major allele is by default not shown (i.e. plotted in white) for a cleaner image (this can be disabled by setting ```-m```)
+- different color modes are supported (see ```-c```), ```multi``` is the default and uses distinct colors for the 10 genotypes
+- the main goal are interactive plots, but smaller regions, especially in ```snps``` mode, can sometimes be used as PNGs (PDF rendering does not produce good results, SVG sometimes)
+- when plotting larger regions, all variants might only be visible when zooming in more closely in the interactive HTML plots
+- looks for ```bcftools``` in ```$PATH```, make sure a recent version is accessible
+- also requires plotly, pandas and numpy
+- for more details check ```vcf_gt_plotter.py --help```
 
 
 ## ```vcf_pca.py```
