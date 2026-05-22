@@ -349,48 +349,50 @@ def fetch_q_rank_offset(aln_df, q_dct, r_name_order_lst):
 
     return q_dct
 
-
 def get_aln(aln_dct, aln_df, aln_type):
 
     '''
-    Fetch alignment list and largest total alignment length per query.
+    Fetch alignment list per query, covering all mapped chromosomes.
     '''
 
-    # iterrate through alignment file by query sequence
+    # iterate through alignment file by query sequence
     for q_name in set(aln_df['q_name']):
 
         # get all alignments per query sequence
         q_name_df = aln_df.loc[aln_df['q_name'] == q_name]
 
-        # get reference with longest alignment per query sequence
-        best_r = \
-            q_name_df.groupby('r_name')['aln_len'].sum().sort_values().index[-1]
+        # iterate through all reference chromosome per query
+        for r_name in set(q_name_df['r_name']):
+            
+            # # ignore reference chromosomes not in 
+            # if r_name not in aln_dct:
+            #     continue
 
-        # subset to that query sequence
-        q_r_df = q_name_df.loc[q_name_df['r_name'] == best_r].copy()
+            # subset to query sequence and current reference chromosome
+            q_r_df = q_name_df.loc[q_name_df['r_name'] == r_name].copy()
 
-        # compute midpoint per alignment
-        q_r_df['r_mid'] = \
-            q_r_df['r_start'] + (q_r_df['r_end']- q_r_df['r_start'])/2
+            # compute midpoint per alignment
+            q_r_df['r_mid'] = \
+                q_r_df['r_start'] + (q_r_df['r_end'] - q_r_df['r_start']) / 2
 
-        # convert alignments to list
-        aln_lst = []
-        for _, row in q_r_df.iterrows():
-            aln_lst.append(
-                [
-                    row['q_strand'],
-                    row['q_start'],
-                    row['q_end'],
-                    row['r_start'],
-                    row['r_end']
-                ]
-            )
+            # convert alignments to list
+            aln_lst = []
+            for _, row in q_r_df.iterrows():
+                aln_lst.append(
+                    [
+                        row['q_strand'],
+                        row['q_start'],
+                        row['q_end'],
+                        row['r_start'],
+                        row['r_end']
+                    ]
+                )
 
-        # add to aln_dct
-        aln_dct[best_r][aln_type][q_name] = {
-            'median_pos': q_r_df['r_mid'].median(),
-            'aln_lst': aln_lst,
-        }
+            # add to aln_dct
+            aln_dct[r_name][aln_type][q_name] = {
+                'median_pos': q_r_df['r_mid'].median(),
+                'aln_lst': aln_lst,
+            }
 
     return aln_dct
 
@@ -1144,7 +1146,6 @@ def main():
             fig.write_html(f'{output_prefix}.html')
         else:
             try:
-                print(f'{output_prefix}.{fmt.lower()}')
                 fig.write_image(f'{output_prefix}.{fmt.lower()}')
             except:
                 print(
