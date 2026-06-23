@@ -425,6 +425,7 @@ def read_gaps(gaps_path, seq_dct):
     gaps_df = pd.read_csv(
         gaps_path,
         sep='\t',
+        usecols=[0,1,2],
         names=['chrom', 'start', 'end'],
     )
     for seq_name in set(gaps_df['chrom']):
