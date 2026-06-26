@@ -768,7 +768,7 @@ def plot(
                 'showline': True,
                 'mirror': True,
                 'linecolor': 'black',
-                'title': f'Samples)'
+                'title': f'Samples'
             },
         )
 
