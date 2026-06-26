@@ -153,7 +153,7 @@ def cli():
     parser.add_argument(
         'sample_id_path',
         type=str,
-        help='file with sample IDs toinclude; determines plotting order'
+        help='file with sample IDs to include; determines plotting order'
              ' (except if phenotypes are specified)',
     )
     parser.add_argument(
@@ -216,10 +216,18 @@ def cli():
         help='column name in phenotypes file (requires -p/--phenotypes)',
     )
     parser.add_argument(
+        '-a', '--annotate',
+        dest='annotate',
+        action='store_true',
+        default=False,
+        help='set to hover-annotate <phenotype_name>, but keep the order from '
+             '<sample_id_path>',
+    )
+    parser.add_argument(
         '-r', '--rev_sample_order',
         dest='rev_sample_order',
-        action='store_false',
-        default=True,
+        action='store_true',
+        default=False,
         help='set to reverse sample plotting order (only effective with '
              '-p/-n)',
     )
@@ -270,10 +278,11 @@ def cli():
 ##  FUNCTIONS
 
 def read_phenotype_data(
-    phenotypes,
-    phenotype_name,
-    sample_lst,
-    rev_sample_order,
+        phenotypes,
+        phenotype_name,
+        sample_lst,
+        annotate,
+        rev_sample_order,
     ):
 
     '''
@@ -311,16 +320,15 @@ def read_phenotype_data(
     phenotypes_df.columns = ['sample_id', phenotype_name]
 
     # sort by phenotype
-    if not rev_sample_order:
+    if not annotate:
         phenotypes_df = phenotypes_df.sort_values(
             phenotype_name,
             ascending=True,
         )
-    else:
-        phenotypes_df = phenotypes_df.sort_values(
-            phenotype_name,
-            ascending=False,
-        )
+    
+    # reverse order if set
+    if rev_sample_order:
+        phenotypes_df = phenotypes_df.iloc[::-1]
 
     # update sample list
     sample_lst = phenotypes_df['sample_id'].to_list()
@@ -329,12 +337,12 @@ def read_phenotype_data(
 
 
 def read_locations_data(
-    locations,
-    chrom,
-    start,
-    end,
-    locations_default_color,
-    locations_default_spread,
+        locations,
+        chrom,
+        start,
+        end,
+        locations_default_color,
+        locations_default_spread,
     ):
 
     '''
@@ -388,13 +396,13 @@ def read_locations_data(
 
 
 def run_bcftools(
-    BCFTOOLS,
-    vcf_path,
-    chrom,
-    start,
-    end,
-    sample_id_path,
-    ref_fasta_path,
+        BCFTOOLS,
+        vcf_path,
+        chrom,
+        start,
+        end,
+        sample_id_path,
+        ref_fasta_path,
     ):
 
     '''
@@ -439,9 +447,9 @@ def run_bcftools(
 
 
 def parse_vcf_data(
-    bcftools_process,
-    sample_lst,
-    viz_mode,
+        bcftools_process,
+        sample_lst,
+        viz_mode,
     ):
 
     '''
@@ -760,7 +768,7 @@ def plot(
                 'showline': True,
                 'mirror': True,
                 'linecolor': 'black',
-                'title': f'Samples (ranked by {phenotype_name})'
+                'title': f'Samples)'
             },
         )
 
@@ -855,6 +863,7 @@ def main():
     no_mask_major_gt = args.no_mask_major_gt
     phenotypes = args.phenotypes
     phenotype_name = args.phenotype_name
+    annotate = args.annotate
     rev_sample_order = args.rev_sample_order
     locations = args.locations
     plot_fmt = args.plot_fmt
@@ -899,6 +908,7 @@ def main():
             phenotypes,
             phenotype_name,
             sample_lst,
+            annotate,
             rev_sample_order,
         )
 
