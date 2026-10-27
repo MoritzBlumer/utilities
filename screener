@@ -28,7 +28,8 @@ cat << EOF > ${out_prefix}.submit
 
 # time: `date`
 
-# command 
+# command
+set -eo pipefail
 $prompt 2> ${out_prefix}.out
 EOF
 
