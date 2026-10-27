@@ -71,6 +71,7 @@ cat << EOF > .slurm/${name}.submit
 
 
 ## JOB
+set -eo pipefail
 ${prompt}
 
 
