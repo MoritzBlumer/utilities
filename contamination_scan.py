@@ -237,9 +237,9 @@ def parse_cram(
         surplus_frac = round(surplus / depth, 2) if depth > 0 else 'NA'
 
         # update counters
-        if depth > depth_threshold:
+        if depth >= depth_threshold:
             pass_sites +=1
-            if surplus > min_count:
+            if surplus >= min_count:
                 surp_sites +=1
 
         # write AD data
@@ -292,12 +292,11 @@ def main():
     # check samtools version
     samtools_v = subprocess.getoutput(
         f'{SAMTOOLS} --version'
-    ).split(' ')[1].split('-')[0]
-    if float(samtools_v.split('.')[0]) <= 1 \
-        and float(samtools_v.split('.')[1]) < 10:
+    ).split()[1].split('-')[0]
+    if tuple(int(x) for x in samtools_v.split('.')[:2]) < (1, 10):
         print(
             f'[ERROR] samtools must be at least v1.10 but found v{samtools_v}',
-            file=sys.stdout,
+            file=sys.stderr,
             flush=True,
         )
         sys.exit(1)
