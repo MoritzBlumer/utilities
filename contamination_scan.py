@@ -95,6 +95,13 @@ def cli():
              ' statistic [default: 8]',
     )
     parser.add_argument(
+        '-b', '--no_baq',
+        dest='no_baq',
+        action='store_true',
+        help=f'{tab}Disable BAQ (base alignment quality) computation in'
+             ' samtools mpileup; recommended for long reads [default: off]',
+    )
+    parser.add_argument(
         '-m', '--min_count',
         dest='min_count',
         type=float,
@@ -138,6 +145,7 @@ def parse_cram(
         ploidy,
         depth_threshold,
         min_count,
+        no_baq,
         ):
 
     '''
@@ -145,31 +153,21 @@ def parse_cram(
     '''
 
     # construct samtools command
+    shell_command = f'{SAMTOOLS} mpileup' \
+        f' {CRAM_PATH}' \
+        f' -f {REF_PATH}' \
+        f' -C {MPILEUP_C}' \
+        f' -d {MPILEUP_d}' \
+        f' -q {MPILEUP_q}' \
+        f' -Q {MPILEUP_Q}' \
+        f' --ff {MPILEUP_ff}' \
+        f' --no-output-ins --no-output-ins' \
+        f' --no-output-del --no-output-del' \
+        f' --no-output-ends'
     if region:
-        shell_command = f'{SAMTOOLS} mpileup' \
-            f' {CRAM_PATH}' \
-            f' -f {REF_PATH}' \
-            f' -r {region}' \
-            f' -C {MPILEUP_C}' \
-            f' -d {MPILEUP_d}' \
-            f' -q {MPILEUP_q}' \
-            f' -Q {MPILEUP_Q}' \
-            f' --ff {MPILEUP_ff}' \
-            f' --no-output-ins --no-output-ins' \
-            f' --no-output-del --no-output-del' \
-            f' --no-output-ends'
-    else:
-        shell_command = f'{SAMTOOLS} mpileup' \
-            f' {CRAM_PATH}' \
-            f' -f {REF_PATH}' \
-            f' -C {MPILEUP_C}' \
-            f' -d {MPILEUP_d}' \
-            f' -q {MPILEUP_q}' \
-            f' -Q {MPILEUP_Q}' \
-            f' --ff {MPILEUP_ff}' \
-            f' --no-output-ins --no-output-ins' \
-            f' --no-output-del --no-output-del' \
-            f' --no-output-ends'
+        shell_command += f' -r {region}'
+    if no_baq:
+        shell_command += ' -B'
 
     # execute samtools mpileup
     process = subprocess.Popen(
@@ -283,6 +281,7 @@ def main():
     region = args.region
     ploidy = args.ploidy
     depth_threshold = args.depth_threshold
+    no_baq = args.no_baq
     min_count = args.min_count
     per_site_tsv = args.per_site_tsv
 
@@ -316,6 +315,7 @@ def main():
         ploidy,
         depth_threshold,
         min_count,
+        no_baq,
         )
 
     # print output to STDOUT
