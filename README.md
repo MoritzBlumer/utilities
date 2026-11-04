@@ -12,7 +12,8 @@ Uses samtools mpileup and counts reads supporting A, T, C, G for a single indivi
 - output: prints a single line to STDOUT with 4 tab-separated fields:
   (1) The specified sample ID
   (2) The total number of sites exceeding ```--depth_threshold```(default: 8)
-  (3) The number of sites wher more than ```--min_count```(default: 1) reads support more than ```--ploidy``` (default: 2) alleles
+  (3) The number of sites wher more than ```--min_count```(default: 1) reads supporting more than ```--ploidy``` (default: 2) alleles
+  (4) The share of sites with support for additional a;lleles [(3) divided by (2)]
 - Use ```--write_per_site_tsv``` and specify a path to write the per site stats if required (output is tab-separated and gzip-compressed, see ```--help``` for details)
 
 
