@@ -548,7 +548,7 @@ class PCA:
         if self.n_pcs > min(n_var, len(self.sample_lst)):
             log.newline()
             log.error(f'-n/--n_pcs ({self.n_pcs}) exceeds the number of'
-                      f' samples({len(self.sample_lst)}) or variants'
+                      f' samples ({len(self.sample_lst)}) or variants'
                       f' ({n_var})')
 
         # print info
@@ -634,12 +634,16 @@ class PCA:
                     gts = [line[9:][idx].split(':')[0] for idx in sample_idx_lst]
                     gts = [self.gt_code_dct[x] for x in gts]
                     if self.skip_monomorphic and \
-                        len(set([x for x in gts if not np.isnan(x)])) == 1:
-                        continue
+                        len(set([x for x in gts if not np.isnan(x)])) <= 1:
+                            continue
                     self.variants.append([pos] + gts)
                     
             self.variants = [x for x in self.variants]
-            self.variant_arr = np.array([x[1:] for x in self.variants],dtype=np.float32)
+            if not self.variants:
+                log.newline()
+                log.error('No variants found')
+            self.variant_arr = \
+                np.array([x[1:] for x in self.variants],dtype=np.float32)
             self.pca()
 
         # print message
