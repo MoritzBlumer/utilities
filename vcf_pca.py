@@ -544,7 +544,7 @@ class PCA:
         # if # variants passes specified threshold
         if n_var == 0:
             log.newline()
-            log.error('No variants found.')
+            log.error('No variants found')
         if self.n_pcs > min(n_var, len(self.sample_lst)):
             log.newline()
             log.error(f'-n/--n_pcs ({self.n_pcs}) exceeds the number of'
