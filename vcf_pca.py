@@ -91,8 +91,7 @@ class CLI:
 
         # add subparser
         pca_parser = self.subparsers.add_parser(
-            'pca', help='Perform windowed PCA on called genotypes (GT) or on'
-            ' genotype likelihoods (GL/PL).'
+            'pca', help='PCA on hard-called genotypes (GT) from a VCF file.'
         )
 
         # positional arguments
@@ -118,6 +117,9 @@ class CLI:
             '-s', '--samples', dest='samples', required=False, metavar='\b',
             help='Comma-separated list of samples to include or file with one'
             ' sample per line.')
+        pca_parser.add_argument(
+            '--np', dest='no_pass_filter', required=False,
+            action='store_true', help='Disable the VCF PASS filter.')
 
 
     def plot(self):
@@ -222,10 +224,12 @@ class CLI:
         args = self.parser.parse_args()
 
         # handle interdependent options
-        if hasattr(args, 'color_by') and not hasattr(args, 'metadata_path'):
+        if getattr(args, 'color_by', None) and \
+            not getattr(args, 'metadata_path', None):
             self.parser.error(
                 '-m/--metadata is required to infer -g/--groups.')
-        if hasattr(args, 'hex_codes') and not hasattr(args, 'color_by'):
+        if getattr(args, 'hex_codes', None) and \
+            not getattr(args, 'color_by', None):
             self.parser.error(
                 '-g/--groups is required if -c/--colors is set.')
 
@@ -264,17 +268,14 @@ class CLI:
                 start = int(args.region.split(':')[1].split('-')[0])
                 end = int(args.region.split(':')[1].split('-')[1])
         if hasattr(args, 'samples') and not args.samples is None:
-            if ',' in args.samples:
-                sample_lst = args.samples.split(',')
-            else:
-                if not os.path.exists(args.samples):
-                    self.parser.error(
-                        args.samples + ': file does not exist.')
-                else:
-                    sample_lst = []
-                    with open(args.samples, 'r') as sample_file:
-                        for line in sample_file:
+            if os.path.isfile(args.samples):
+                sample_lst = []
+                with open(args.samples, 'r') as sample_file:
+                    for line in sample_file:
+                        if line.strip():
                             sample_lst.append(line.strip().split('\t')[0])
+            else:
+                sample_lst = args.samples.split(',')
         if hasattr(args, 'flip_windows') and not args.flip_windows is None:
             if ',' in args.flip_windows:
                 flip_window_lst = args.flip_windows.split(',')
@@ -345,7 +346,8 @@ class CLI:
         
         # add in settings from config
         self.args_dct['skip_monomorphic'] = self.default_dct['skip_monomorphic']
-        self.args_dct['vcf_pass_filter'] = self.default_dct['vcf_pass_filter']
+        self.args_dct['vcf_pass_filter'] = self.default_dct['vcf_pass_filter'] \
+            and not getattr(args, 'no_pass_filter', False)
         self.args_dct['gt_mean_impute'] = self.default_dct['gt_mean_impute']
         self.args_dct['plot_w'] = self.default_dct['plot_w']
         self.args_dct['plot_h'] = self.default_dct['plot_h']
@@ -543,6 +545,11 @@ class PCA:
         if n_var == 0:
             log.newline()
             log.error('No variants found.')
+        if self.n_pcs > min(n_var, len(self.sample_lst)):
+            log.newline()
+            log.error(f'-n/--n_pcs ({self.n_pcs}) exceeds the number of'
+                      f' samples({len(self.sample_lst)}) or variants'
+                      f' ({n_var})')
 
         # print info
         log.newline()
@@ -578,6 +585,12 @@ class PCA:
         if self.sample_lst is None:
             self.sample_lst = list(dict.fromkeys(var_file_sample_lst))
 
+        # error if specified samples are not in the VCF
+        missing_lst = \
+            [x for x in self.sample_lst if x not in var_file_sample_lst]
+        if missing_lst:
+            log.error(f'Samples not found in VCF: {",".join(missing_lst)}')
+
         # obtain index positions (returns first hit)
         sample_idx_lst = [
             var_file_sample_lst.index(x) for x in self.sample_lst
@@ -605,7 +618,7 @@ class PCA:
                     gts = [line[9:][idx].split(':')[0] for idx in sample_idx_lst]
                     gts = [self.gt_code_dct[x] for x in gts]
                     if self.skip_monomorphic and \
-                        len(set([x for x in gts if not np.isnan(x)])) == 1:
+                        len(set([x for x in gts if not np.isnan(x)])) <= 1:
                         continue
                     self.variants.append([pos] + gts)
 
@@ -740,17 +753,18 @@ class Plot:
                 log.error('The provided metadata file contains non-unique'
                           ' sample IDs')
                 log.newline()
-            # subset and reorder metadata_df to match data_df individuals
-            self.metadata_df = self.metadata_df.loc[
-                self.metadata_df.index.intersection(sample_lst)
-            ].reindex(sample_lst)
 
             # if individuals are missing in the metadata print error message
-            if len(self.metadata_df) != len(sample_lst):
+            missing_lst = [
+                x for x in sample_lst if x not in self.metadata_df.index
+            ]
+            if missing_lst:
                 log.newline()
-                log.error('One or more sample IDs are missing in the'
-                          ' provided metadata file')
-                log.newline()
+                log.error('The following sample IDs are missing in the'
+                          f' provided metadata file: {",".join(missing_lst)}')
+
+            # subset and reorder metadata_df to match data_df individuals
+            self.metadata_df = self.metadata_df.loc[sample_lst]
 
             # add metadata columns to data_df
             for column_name in self.metadata_df.columns:
@@ -801,7 +815,7 @@ class Plot:
             self.group_lst = \
                 [
                     x for x in self.group_lst \
-                        if self.na_lst
+                        if x in self.na_lst
                 ] \
                 + sorted(
                 [
@@ -1085,11 +1099,6 @@ class Plot:
         Stacked plot of 10 PCs plus variance explained.
         '''
 
-        # set plot pcs
-        plot_pcs = [
-            'PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', 'PC9', 'PC10',
-        ]
-
         # LOAD & PREPARE DATA
 
         # load data
@@ -1100,6 +1109,9 @@ class Plot:
             f'{self.prefix}.ve.tsv.gz', sep='\t'
         )
 
+        # set plot pcs
+        plot_pcs = list(self.ve_df.columns)[:10]
+
         # POSSIBLY ADD: flip individual PCs
         # if self.invert:
         #     if self.invert == 'x':
@@ -1109,7 +1121,8 @@ class Plot:
         if self.scale == True:
             ve_values = self.ve_df.iloc[0, :].values
             scaling_factors = ve_values / ve_values[0]
-            self.pc_df = self.pc_df.multiply(scaling_factors, axis=1)
+            pc_cols = list(self.ve_df.columns)
+            self.pc_df[pc_cols] = self.pc_df[pc_cols] * scaling_factors
 
         # annotate per-sample data if metadata were supplied
         self.annotate()
@@ -1151,7 +1164,7 @@ class Plot:
         )
 
         # get y values corresponding with the PCs        
-        y = list(reversed(list(range(0, 10))))
+        y = list(reversed(range(len(plot_pcs))))
 
 
         ## PANEL I: PC values
@@ -1193,7 +1206,7 @@ class Plot:
                     go.Scattergl(
                         x=row[plot_pcs].to_list(),
                         y=y,
-                        hovertext=row[['hover_label']],
+                        hovertext=[row['hover_label']] * len(y),
                         hoverinfo='text',
                         hoverlabel=dict(font_size=8),
                         name=group,
@@ -1209,7 +1222,7 @@ class Plot:
         ## PANEL II: Variance explained
 
         # fetch ve values
-        ve_values = self.ve_df.iloc[0, :].values 
+        ve_values = self.ve_df[plot_pcs].iloc[0].values
         self.fig.add_trace(
             go.Bar(
                 x=ve_values,
@@ -1281,7 +1294,7 @@ class Plot:
         # format y axis
         self.fig.update_yaxes(
             tickvals=y,
-            ticktext=self.pc_df.columns[1:11].to_list(),
+            ticktext=plot_pcs,
             linewidth=1,
             side='left', 
             mirror=True,
@@ -1295,7 +1308,7 @@ class Plot:
         )
         self.fig.update_yaxes(
             tickvals=y,
-            ticktext=self.pc_df.columns[1:11].to_list(),
+            ticktext=plot_pcs,
             linewidth=1,
             side='left', 
             mirror=True,
