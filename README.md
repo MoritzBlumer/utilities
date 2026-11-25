@@ -67,6 +67,12 @@ Plot whole genome alignment from BAM.
 - usage: ```python plot_bam_alignments.py <input_path> <output_path> <faidx_path> <assoc_file_path> <regions_file_path>```
 - for details check ```plot_bam_alignments.py --help```
 
+## ```plot_imiss.py```
+
+Simple script to plot missingness per sample per chromosome from vcftools --missing-indv output files.
+- usage: ```python plot_imiss.py <prefix> <chroms> <output_path>```
+- for details check ```plot_imiss.py --help```
+
 
 ## ```plot_paf_wga.py```
 
