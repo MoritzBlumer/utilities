@@ -192,7 +192,7 @@ def main():
     save_fig(imiss_fig, output_path)
 
     print(
-        f'\n[INFO] Done {suffix}\n',
+        f'\n[INFO] Done\n',
         file=sys.stderr,
     )
 
